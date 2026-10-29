@@ -32,13 +32,20 @@
 attribute vec3 aFrom; attribute vec3 aTo; attribute vec4 aR;
 uniform vec2 uView; uniform float uD, uT, uTime, uDpr, uIntro, uHeroY;
 uniform vec3 uFromOff, uToOff; uniform float uFromKind, uToKind, uFromSize, uToSize;
-uniform vec2 uMouse; uniform vec4 uClick; uniform float uPush; uniform float uShapeA;
-varying float vA; varying float vTint;
+uniform vec2 uMouse; uniform float uPush; uniform float uShapeA;
+uniform vec3 uFromC1, uFromC2, uToC1, uToC2; uniform vec4 uFromAx, uToAx;
+varying float vA; varying vec3 vCol;
 vec3 rotY(vec3 p, float a){ float c=cos(a), s=sin(a); return vec3(c*p.x+s*p.z, p.y, -s*p.x+c*p.z); }
 vec3 rotX(vec3 p, float a){ float c=cos(a), s=sin(a); return vec3(p.x, c*p.y-s*p.z, s*p.y+c*p.z); }
 vec3 animate(vec3 p, float kind, vec4 r){
-  if (kind < .5) {                       // flat: name / text, gentle shimmer
-    return p + vec3(sin(uTime*1.3 + r.x*40.)*.6, cos(uTime*1.1 + r.y*40.)*.6, 0.);
+  if (kind < .5) {                       // flat: the name breathes; the dust behind it drifts
+    if (p.z < -100.) {
+      p.x += sin(uTime*.07 + r.x*6.28)*120. + uTime*12.*(r.y-.5);
+      p.y += cos(uTime*.05 + r.y*6.28)*80.;
+      p.x = mod(p.x + uView.x*.9, uView.x*1.8) - uView.x*.9;
+      return p;
+    }
+    return p + vec3(sin(uTime*1.3 + r.x*40.)*.7, cos(uTime*1.1 + r.y*40.)*.7 + sin(uTime*.8 + p.x*.004)*3., 0.);
   } else if (kind < 1.5) {               // terrain: a living signal surface
     p.y += sin(p.x*.006 + uTime*.9)*cos(p.z*.008 - uTime*.6)*70. + sin(p.x*.017 - uTime*1.4)*18.;
     return rotX(p, -.18);
@@ -64,26 +71,26 @@ void main(){
   p = mix(scatter, p, ik);
   // cursor pushes particles away; a click sends a ring outward
   vec2 d = p.xy - uMouse; float dl = length(d);
-  float push = (1. - smoothstep(0., 190., dl)) * uPush;
-  p.xy += normalize(d + .0001) * push * push * 120.;
-  float ct = uTime - uClick.z;
-  float ring = ct * 900.; float rd = abs(length(p.xy - uClick.xy) - ring);
-  p.xy += normalize(p.xy - uClick.xy + .0001) * (1. - smoothstep(0., 90., rd)) * 46. * exp(-ct*1.6) * uClick.w;
+  float push = (1. - smoothstep(0., 140., dl)) * uPush;
+  p.xy += normalize(d + .0001) * push * push * 26.;
   float w = uD - p.z;
   gl_Position = vec4(p.x/(uView.x*.5)*uD, p.y/(uView.y*.5)*uD, 0., w);
   float size = mix(uFromSize, uToSize, k);
-  gl_PointSize = max(1., size * uD / w * uDpr * (1. + push*.6));
+  gl_PointSize = max(1., size * uD / w * uDpr * (1. + push*.25));
   float depth = clamp(uD / w, .2, 1.4);
   vA = mix(1., uShapeA, step(.5, mix(uFromKind, uToKind, k))) * depth * (.6 + .4*aR.y) * ik;
-  vTint = aR.x;
+  float ga = clamp(dot(aFrom, uFromAx.xyz) * uFromAx.w + .5 + (aR.x - .5)*.3, 0., 1.);
+  float gb = clamp(dot(aTo, uToAx.xyz) * uToAx.w + .5 + (aR.x - .5)*.3, 0., 1.);
+  vec3 ca = mix(uFromC1, uFromC2, ga), cb = mix(uToC1, uToC2, gb);
+  vCol = mix(ca, cb, k);
+  vCol = mix(vCol, vec3(1.), .18 * aR.z);     // a few brighter, whiter sparks
 }`;
     const FS = `precision mediump float;
-varying float vA; varying float vTint;
+varying float vA; varying vec3 vCol;
 void main(){
   vec2 c = gl_PointCoord - .5; float d = length(c);
   float a = smoothstep(.5, .1, d) * vA;
-  vec3 col = mix(vec3(1.), mix(vec3(.72,.85,1.), vec3(1.,.86,.74), vTint), .22);
-  gl_FragColor = vec4(col * a, a);
+  gl_FragColor = vec4(vCol * a, a);
 }`;
     const sh = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) console.warn(gl.getShaderInfoLog(o)); return o; };
     const pr = gl.createProgram();
@@ -91,7 +98,7 @@ void main(){
     if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return;
     gl.useProgram(pr);
     gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    const U = {}; ['uView','uD','uT','uTime','uDpr','uIntro','uHeroY','uFromOff','uToOff','uFromKind','uToKind','uFromSize','uToSize','uMouse','uClick','uPush','uShapeA'].forEach((k) => (U[k] = gl.getUniformLocation(pr, k)));
+    const U = {}; ['uView','uD','uT','uTime','uDpr','uIntro','uHeroY','uFromOff','uToOff','uFromKind','uToKind','uFromSize','uToSize','uMouse','uPush','uShapeA','uFromC1','uFromC2','uToC1','uToC2','uFromAx','uToAx'].forEach((k) => (U[k] = gl.getUniformLocation(pr, k)));
     const A = { from: gl.getAttribLocation(pr, 'aFrom'), to: gl.getAttribLocation(pr, 'aTo'), r: gl.getAttribLocation(pr, 'aR') };
 
     // per-particle randoms
@@ -102,6 +109,16 @@ void main(){
     gl.enableVertexAttribArray(A.from); gl.enableVertexAttribArray(A.to);
 
     const KIND = { text: 0, terrain: 1, sphere: 2, lattice: 2, helix: 3, galaxy: 4 };
+    const hex = (h) => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
+    // two colours per scene and the axis the gradient runs along (x, y, z, scale per px)
+    const PALETTE = {
+      text:    ['#c9f4ff', '#f0d6ff', [1, 0, 0], 1 / 1400],
+      terrain: ['#2ee6d6', '#6a6cff', [0, 0, -1], 1 / 1800],
+      sphere:  ['#8f7bff', '#ff6fb5', [0, 1, 0], 1 / 700],
+      helix:   ['#35d4ff', '#ff5fa8', [0, 1, 0], 1 / 900],
+      lattice: ['#ffc24a', '#ff6a7d', [1, .4, 0], 1 / 700],
+      galaxy:  ['#ffe28a', '#7d7dff', [1, 0, 0], 1 / 520],
+    };
     let stages = [];   // { el, shape, buf, kind, size, off }
 
     /* --- shapes (centred, css px units) */
@@ -215,7 +232,8 @@ void main(){
         const made = shape === 'text' ? textShape($(el.dataset.stageText || 'h1', el)) : SHAPES[shape]();
         const buf = (old[i] && old[i].buf) || gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, made.arr, gl.STATIC_DRAW);
-        stages.push({ el, shape, buf, kind: KIND[shape], size: made.size, off: shape === 'text' ? [0, 0, 0] : offsetFor(shape) });
+        const pal = PALETTE[shape];
+        stages.push({ el, shape, buf, kind: KIND[shape], size: made.size, off: shape === 'text' ? [0, 0, 0] : offsetFor(shape), c1: hex(pal[0]), c2: hex(pal[1]), ax: [...pal[2], pal[3]] });
       });
       film.ok = stages.length > 0;
       if (film.ok) root.classList.add('film');
@@ -238,12 +256,8 @@ void main(){
       return s;
     }
 
-    const mouse = { x: -9999, y: -9999, tx: -9999, ty: -9999 }; let push = 0, click = [0, 0, -100, 0];
+    const mouse = { x: -9999, y: -9999, tx: -9999, ty: -9999 }; let push = 0;
     addEventListener('pointermove', (e) => { mouse.tx = e.clientX - state.vw / 2; mouse.ty = state.vh / 2 - e.clientY; }, { passive: true });
-    addEventListener('pointerdown', (e) => {
-      if (e.target.closest('a, button, input, [role="slider"], .player')) return;
-      click = [e.clientX - state.vw / 2, state.vh / 2 - e.clientY, performance.now() / 1000, 1];
-    }, { passive: true });
     document.addEventListener('pointerleave', () => { mouse.tx = mouse.ty = -9999; });
 
     film.intro = 1;
@@ -267,8 +281,9 @@ void main(){
       gl.uniform1f(U.uFromSize, A0.size); gl.uniform1f(U.uToSize, B0.size);
       // the cursor matters most on the name; elsewhere it's a gentle nudge
       const onName = A0.shape === 'text' ? 1 - t : 0;
-      gl.uniform2f(U.uMouse, mouse.x, mouse.y + (A0.shape === 'text' ? 0 : 0)); gl.uniform1f(U.uPush, push * (0.35 + 0.65 * onName));
-      gl.uniform4f(U.uClick, click[0], click[1], click[2], click[3]);
+      gl.uniform2f(U.uMouse, mouse.x, mouse.y + (A0.shape === 'text' ? 0 : 0)); gl.uniform1f(U.uPush, push * (0.5 + 0.5 * onName));
+      gl.uniform3fv(U.uFromC1, A0.c1); gl.uniform3fv(U.uFromC2, A0.c2); gl.uniform3fv(U.uToC1, B0.c1); gl.uniform3fv(U.uToC2, B0.c2);
+      gl.uniform4fv(U.uFromAx, A0.ax); gl.uniform4fv(U.uToAx, B0.ax);
       gl.uniform1f(U.uShapeA, state.vw < 900 ? 0.32 : 0.8);
       gl.drawArrays(gl.POINTS, 0, N);
       DS.stage = s;
