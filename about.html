@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>About — Dhruv Sharma</title>
+<meta name="description" content="About Dhruv Sharma: software and IoT developer in Mumbai, B.Tech Information Technology student at K. J. Somaiya Institute of Technology.">
+<meta name="theme-color" content="#000000">
+<meta property="og:title" content="About — Dhruv Sharma">
+<meta property="og:image" content="media/reel-poster.jpg">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/display-black.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="styles.css">
+<script>
+  (function () {
+    var d = document.documentElement;
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      d.classList.add('motion');
+      try { if (sessionStorage.getItem('ds-curtain') === '1') d.classList.add('arriving'); } catch (e) {}
+      setTimeout(function () { if (!window.__motionReady) { d.classList.remove('motion', 'arriving', 'intro-on'); } }, 3000);
+    }
+  })();
+</script>
+</head>
+<body class="page-about">
+<a class="skip" href="#main">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="spec" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="640" y2="0">
+      <stop offset="0" stop-color="#ff3d5a"/><stop offset=".16" stop-color="#ff9a2e"/><stop offset=".32" stop-color="#ffe14a"/>
+      <stop offset=".48" stop-color="#3dff8f"/><stop offset=".64" stop-color="#2ee6ff"/><stop offset=".8" stop-color="#4a6dff"/><stop offset="1" stop-color="#c04dff"/>
+    </linearGradient>
+  </defs>
+</svg>
+<canvas class="bg" id="bg" aria-hidden="true"></canvas>
+<div class="progress" aria-hidden="true"><i id="progress"></i></div>
+<div class="cursor" aria-hidden="true"><span class="cursor-label"></span></div>
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="intro-line"></div>
+  <div class="intro-spectrum"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <p class="intro-count"><span id="introCount">00</span></p>
+  <div class="bar bar-top"></div><div class="bar bar-bottom"></div>
+</div>
+<div class="curtain" id="curtain" aria-hidden="true"><div class="curtain-panel"></div><div class="wipe-strip"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<header class="nav" id="nav">
+  <a class="wordmark" href="index.html" data-transition aria-label="Dhruv Sharma, home">Dhruv Sharma</a>
+  <nav aria-label="Primary"><ul><li><a href="index.html#work" data-transition>Work</a></li><li><a href="index.html#experience" data-transition>Experience</a></li><li><a href="index.html#toolkit" data-transition>Toolkit</a></li><li><a href="about.html" data-transition aria-current="page">About</a></li></ul></nav>
+  <a class="btn btn-small btn-light" href="index.html#contact" data-transition data-magnetic>Contact</a>
+</header>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<main id="main">
+  <section class="hero about-hero" id="top" aria-labelledby="about-title">
+    <div class="hero-inner">
+      <h1 id="about-title" class="hero-title" aria-label="About"><span class="line" aria-hidden="true"><span class="ch" style="--i:0">A</span><span class="ch" style="--i:1">b</span><span class="ch" style="--i:2">o</span><span class="ch" style="--i:3">u</span><span class="ch" style="--i:4">t</span></span></h1>
+      <p class="about-lead" data-rise style="--i:1">I'm Dhruv, a software and IoT developer in Mumbai. I focus on practical solutions that connect software, data and embedded systems, and I'm happiest when an app and a circuit board have to agree with each other.</p>
+    </div>
+  </section>
+
+  <section class="about-block scene" aria-labelledby="edu-title">
+    <div class="wipe about-grid">
+      <h2 id="edu-title" class="h2">Education</h2>
+      <div class="about-body">
+        <p class="about-big">B.Tech in Information Technology</p>
+        <p class="about-mid">K. J. Somaiya Institute of Technology, Mumbai</p>
+        <dl class="facts">
+          <div><dt>CGPA</dt><dd><span class="count" data-to="9.2">9.2</span></dd></div>
+          <div><dt>Graduating</dt><dd>2028</dd></div>
+        </dl>
+        <p class="about-p">Grounded in data structures and algorithms, database management systems, software engineering, operating systems and computer networks.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-block scene" aria-labelledby="now-title">
+    <div class="wipe about-grid">
+      <h2 id="now-title" class="h2">Right now</h2>
+      <div class="about-body">
+        <p class="about-big">Research on a haemophilia monitoring device</p>
+        <p class="about-p">Since July 2026 I've been a research intern at K. J. Somaiya College of Physiotherapy, working with physiotherapists and engineers on IoT hardware for patient monitoring and support. It connects directly to HemoPhysio, my rehab app.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-block scene" aria-labelledby="how-title">
+    <div class="wipe about-grid">
+      <h2 id="how-title" class="h2">How I work</h2>
+      <ul class="traits">
+        <li>Problem solving</li><li>Team collaboration</li><li>Leadership</li>
+        <li>Clear communication</li><li>Quick learning</li><li>Time management</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="contact scene" aria-labelledby="ct-title">
+    <div class="wipe">
+      <h2 id="ct-title" class="contact-title"><span class="spectral">See the</span><br>work.</h2>
+      <div class="contact-actions">
+        <a class="btn btn-light" href="index.html#work" data-transition data-magnetic>View projects</a>
+        <a class="btn btn-dark" href="mailto:dhruv.sharma06@somaiya.edu" data-magnetic>Email me</a>
+      </div>
+      <ul class="contact-list">
+        <li><a href="https://github.com/dhruvsharma06-web" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a></li>
+        <li>dhruv.sharma06@somaiya.edu</li>
+        <li>Mumbai, India</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="footer" id="footer">
+  <p class="foot-name" aria-label="Dhruv Sharma"><span aria-hidden="true"><span class="ch" style="--i:0">D</span><span class="ch" style="--i:1">h</span><span class="ch" style="--i:2">r</span><span class="ch" style="--i:3">u</span><span class="ch" style="--i:4">v</span><span class="ch sp" style="--i:5"> </span><span class="ch" style="--i:6">S</span><span class="ch" style="--i:7">h</span><span class="ch" style="--i:8">a</span><span class="ch" style="--i:9">r</span><span class="ch" style="--i:10">m</span><span class="ch" style="--i:11">a</span></span></p>
+  <div class="foot-row">
+    <p>© 2026 Dhruv Sharma</p>
+    <a href="#top">Back to top <span aria-hidden="true">↑</span></a>
+  </div>
+</footer>
+<script src="core.js" defer></script>
+<script src="about.js" defer></script>
+</body>
+</html>

@@ -1,13 +1,14 @@
 # Dhruv Sharma — portfolio
 
-Static site: plain HTML, CSS and JavaScript, no build step and no dependencies.
+Static site (HTML, CSS, JavaScript). No build step, no dependencies.
+
+- `index.html` — home: hero with showreel, projects, experience, toolkit, contact
+- `about.html` — education, current research, how I work
+- `core.js` — shared motion: WebGL light-strip background, cursor, scene wipes, intro, page transitions
+- `main.js` — home page interactions and the showreel player
+- `media/reel.mp4` — 32-second showreel (rendered from code)
 
 ## Deploy on Vercel
-1. Push this folder to a GitHub repo (or drag the folder into vercel.com/new).
-2. In Vercel: **Add New → Project → Import** the repo.
-3. Framework preset: **Other**. Leave Build Command and Output Directory empty.
-4. Deploy.
+Import this repo at vercel.com/new, framework preset **Other**, leave build settings empty, Deploy.
 
-## Edit content
-Everything you'd change is in `index.html` (projects, research, skills, contact).
 Fonts: Inter Display / Inter (SIL Open Font License), self-hosted in `/fonts`.

@@ -1,307 +1,205 @@
-/* Dhruv Sharma — portfolio motion. No dependencies. */
+/* Home page: hero, statement, stacked project scenes, timeline, toolkit, player. */
 (() => {
-  const root = document.documentElement;
-  const motion = root.classList.contains('motion');
-  const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
-  window.__motionReady = true;
+  const DS = window.DS; if (!DS) return;
+  const { $, $$, clamp, motion, fine, state } = DS;
 
-  const $ = (s, el = document) => el.querySelector(s);
-  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
-  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-  let vw = innerWidth, vh = innerHeight;
-
-  /* ---------- Intro */
-  const start = () => requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add('loaded')));
-  if (document.fonts && document.fonts.ready) {
-    Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 700))]).then(start);
-  } else start();
-
-  /* ---------- Reveal on enter */
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((e) => {
-      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  /* ---------- Hero: push back on scroll, chromatic split on fast scroll */
+  const heroInner = $('#heroInner'), heroTitle = $('.hero-title');
+  if (motion) {
+    let ab = 0;
+    DS.onFrame(() => {
+      const p = clamp(state.y / state.vh);
+      if (p < 1) {
+        heroInner.style.transform = `translate3d(0,${(p * state.vh * 0.12).toFixed(1)}px,0) scale(${(1 - p * 0.08).toFixed(4)})`;
+        heroInner.style.opacity = Math.max(0, 1 - p * 1.8).toFixed(3);
+      }
+      ab += (clamp(Math.abs(state.vel) / 3, 0, 14) - ab) * 0.2;
+      heroTitle.style.textShadow = ab > 0.3 ? `${(-ab).toFixed(1)}px 0 rgba(255,40,90,.85), ${ab.toFixed(1)}px 0 rgba(40,230,255,.85)` : 'none';
     });
-  }, { rootMargin: '0px 0px -10% 0px' });
-  $$('[data-reveal]').forEach((el) => (el.closest('.hero') ? el.classList.add('in') : io.observe(el)));
-
-  /* ---------- Statement: split into words, light them up with scroll */
-  const statement = $('#statement');
-  const statementSec = $('.statement');
-  let words = [];
-  if (statement && motion) {
-    const text = statement.textContent.trim();
-    statement.setAttribute('aria-label', text);
-    statement.innerHTML = text.split(/\s+/).map((w) => `<span class="w" aria-hidden="true">${w}</span>`).join(' ');
-    words = $$('.w', statement);
   }
 
-  /* ---------- Work: horizontal scroll on wide screens */
-  const work = $('#work');
-  const track = $('#track');
-  const panels = $$('.panel');
-  let horizontal = false, trackW = 0, maxX = 0;
-  const panelIO = new IntersectionObserver((entries) => {
-    entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('on'); panelIO.unobserve(e.target); } });
-  }, { rootMargin: '0px 0px -20% 0px' });
-
-  function layoutWork() {
-    const want = motion && vw >= 900 && vh >= 560;
-    if (want !== horizontal) {
-      horizontal = want;
-      work.classList.toggle('h', horizontal);
-      if (!horizontal) { track.style.transform = ''; work.style.height = ''; panels.forEach((p) => panelIO.observe(p)); }
-    }
-    if (horizontal) {
-      trackW = track.scrollWidth;
-      maxX = Math.max(0, trackW - vw + parseFloat(getComputedStyle(work.firstElementChild).paddingLeft) * 2);
-      work.style.height = `${trackW - vw + vh * 1.15}px`;
-    }
+  /* ---------- Statement: words light up, the current word carries the spectrum */
+  const st = $('#statement'), stSec = $('.statement');
+  if (st && motion) {
+    const text = st.textContent.trim();
+    st.setAttribute('aria-label', text);
+    st.innerHTML = text.split(/\s+/).map((w) => `<span class="w" aria-hidden="true">${w}</span>`).join(' ');
+    const words = $$('.w', st);
+    DS.onFrame(() => {
+      const r = stSec.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > state.vh) return;
+      const p = clamp((-r.top + state.vh * 0.2) / (r.height - state.vh * 0.9));
+      const lit = p * (words.length + 1);
+      for (let i = 0; i < words.length; i++) {
+        const k = clamp(lit - i);
+        words[i].style.opacity = (0.14 + 0.86 * k).toFixed(3);
+        words[i].classList.toggle('now', k > 0 && k < 1);
+      }
+    });
   }
 
-  /* ---------- Stack: marquee rows */
+  /* ---------- Work: stacked scenes. Each card pushes back and dims as the next arrives. */
+  const cards = $$('.card');
+  const inners = cards.map((c) => $('.card-inner', c));
+  const cardIO = new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) { e.target.classList.add('on'); cardIO.unobserve(e.target); }
+  }), { rootMargin: '0px 0px -30% 0px' });
+  cards.forEach((c) => cardIO.observe(c));
+  const stacked = () => motion && state.vw >= 900;
+  if (motion) {
+    DS.onFrame(() => {
+      if (!stacked()) { inners.forEach((el) => { el.style.transform = ''; el.style.setProperty('--dim', 0); }); return; }
+      for (let i = 0; i < cards.length - 1; i++) {
+        const next = cards[i + 1].getBoundingClientRect();
+        const p = clamp(1 - next.top / state.vh);       // 0 when next card is below the fold, 1 when it covers this one
+        const e = p * p * (3 - 2 * p);
+        inners[i].style.transform = `translate3d(0,${(-e * 30).toFixed(1)}px,0) scale(${(1 - e * 0.1).toFixed(4)})`;
+        inners[i].style.setProperty('--dim', (e * 0.92).toFixed(3));
+      }
+    });
+  }
+
+  /* 3D tilt on the visual (fine pointers) */
+  if (fine && motion) {
+    $$('[data-tilt]').forEach((el) => {
+      const frame = $('.viz-frame', el);
+      el.addEventListener('pointermove', (e) => {
+        const r = el.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+        frame.style.setProperty('--ry', `${(x * 10).toFixed(2)}deg`);
+        frame.style.setProperty('--rx', `${(-y * 8).toFixed(2)}deg`);
+      });
+      el.addEventListener('pointerleave', () => { frame.style.setProperty('--ry', '0deg'); frame.style.setProperty('--rx', '0deg'); });
+    });
+  }
+
+  /* ---------- Experience: the rail fills with light as you scroll */
+  const tl = $('#timeline'), tlFill = $('#tlFill');
+  if (tl) {
+    DS.onFrame(() => {
+      const r = tl.getBoundingClientRect();
+      const p = motion ? clamp((state.vh * 0.7 - r.top) / r.height) : 1;
+      tlFill.parentElement.style.setProperty('--fill', p.toFixed(4));
+    });
+  }
+
+  /* ---------- Toolkit: marquee rows, drift + scroll velocity, pause on hover */
   const rows = $$('.row').map((row) => {
-    const strip = $('.strip', row);
-    const ul = $('ul', strip);
-    const inner = document.createElement('div');
-    inner.className = 'strip-inner';
-    strip.appendChild(inner);
-    inner.appendChild(ul);
-    if (motion) {
-      for (let i = 0; i < 3; i++) {
-        const c = ul.cloneNode(true); c.setAttribute('aria-hidden', 'true'); inner.appendChild(c);
-      }
-    }
-    return { row, inner, ul, dir: Number(row.dataset.dir) || 1, x: 0, w: 0 };
+    const strip = $('.strip', row), ul = $('ul', strip);
+    const inner = document.createElement('div'); inner.className = 'strip-inner';
+    strip.appendChild(inner); inner.appendChild(ul);
+    if (motion) for (let i = 0; i < 3; i++) { const c = ul.cloneNode(true); c.setAttribute('aria-hidden', 'true'); inner.appendChild(c); }
+    const o = { inner, ul, dir: Number(row.dataset.dir) || 1, x: 0, w: 0, speed: 1, target: 1 };
+    row.addEventListener('pointerenter', () => { o.target = 0; });
+    row.addEventListener('pointerleave', () => { o.target = 1; });
+    return o;
   });
-  const measureRows = () => rows.forEach((r) => { r.w = r.ul.getBoundingClientRect().width; });
-
-  /* ---------- Footer letters */
-  const foot = $('.foot-name');
-  const footChars = $$('.foot-name .ch');
-  const research = $('.research-field');
-
-  /* ---------- Nav hide on scroll down */
-  const nav = $('#nav');
-  let lastY = scrollY;
-
-  /* ---------- Count up CGPA once */
-  const count = $('.count');
-  if (count && motion) {
-    const to = parseFloat(count.dataset.to);
-    count.textContent = '0.0';
-    const cio = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      cio.disconnect();
-      const t0 = performance.now(), dur = 1400;
-      const step = (t) => {
-        const p = clamp((t - t0) / dur);
-        const eased = 1 - Math.pow(1 - p, 4);
-        count.textContent = (to * eased).toFixed(1);
-        if (p < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
-    }, { threshold: 0.6 });
-    cio.observe(count);
-  }
-
-  /* ---------- Scroll-driven frame */
-  let scrollV = 0, prevScroll = scrollY, lastT = performance.now();
-
-  function frame(t) {
-    const dt = Math.min(64, t - lastT); lastT = t;
-    const y = scrollY;
-    const dy = y - prevScroll; prevScroll = y;
-    scrollV += (dy - scrollV) * 0.12;
-
-    // nav
-    if (Math.abs(y - lastY) > 6) {
-      nav.classList.toggle('hide', y > lastY && y > vh * 0.6);
-      lastY = y;
-    }
-
-    if (motion) {
-      // statement words
-      if (words.length) {
-        const r = statementSec.getBoundingClientRect();
-        const p = clamp((-r.top + vh * 0.35) / (r.height - vh * 0.6));
-        const lit = p * words.length * 1.08;
-        for (let i = 0; i < words.length; i++) {
-          words[i].style.opacity = (0.16 + 0.84 * clamp(lit - i)).toFixed(3);
-        }
-      }
-
-      // horizontal work track
-      if (horizontal) {
-        const r = work.getBoundingClientRect();
-        const p = clamp(-r.top / (r.height - vh));
-        const x = -p * maxX;
-        track.style.transform = `translate3d(${x.toFixed(1)}px,0,0)`;
-        if (r.top < vh * 0.5) {
-          for (const pnl of panels) {
-            if (pnl.classList.contains('on')) continue;
-            const left = pnl.offsetLeft + x;
-            if (left < vw * 0.62) pnl.classList.add('on');
-          }
-        }
-      }
-
-      // research field opens up
-      if (research) {
-        const r = research.getBoundingClientRect();
-        const p = clamp((vh - r.top) / (vh * 0.85));
-        research.style.setProperty('--ci', `${((1 - p) * 7).toFixed(2)}%`);
-      }
-
-      // marquee rows: constant drift plus scroll velocity
+  const measure = () => rows.forEach((r) => { r.w = r.ul.getBoundingClientRect().width; });
+  measure(); addEventListener('resize', measure);
+  if (document.fonts) document.fonts.ready.then(measure);
+  if (motion) {
+    let last = performance.now();
+    DS.onFrame((t) => {
+      const dt = Math.min(50, t - last); last = t;
       for (const m of rows) {
         if (!m.w) continue;
-        m.x += m.dir * (0.035 * dt + Math.abs(scrollV) * 0.6);
+        m.speed += (m.target - m.speed) * 0.08;
+        m.x += m.dir * m.speed * (0.04 * dt + Math.abs(state.vel) * 0.5);
         const xx = ((m.x % m.w) + m.w) % m.w;
         m.inner.style.transform = `translate3d(${(-xx).toFixed(1)}px,0,0)`;
       }
-
-      // footer name rises letter by letter
-      if (foot) {
-        const maxY = document.documentElement.scrollHeight - vh;
-        const p = clamp(1 - (maxY - y) / (vh * 0.45));
-        footChars.forEach((c, i) => {
-          const k = clamp(p * 1.6 - i * 0.05);
-          const e = 1 - Math.pow(1 - k, 3);
-          c.style.transform = `translate3d(0,${((1 - e) * 100).toFixed(1)}%,0)`;
-        });
-      }
-    }
-    requestAnimationFrame(frame);
-  }
-
-  /* ---------- Hero signal trace */
-  const canvas = $('#trace');
-  const ctx = canvas.getContext('2d');
-  let cw = 0, ch = 0, dpr = 1, pointer = { x: -9999, y: 0, energy: 0 }, traceVisible = true, phase = 0;
-  const css = getComputedStyle(root);
-  const INK = css.getPropertyValue('--ink').trim() || '#F3F0E7';
-  const ACC = css.getPropertyValue('--accent').trim() || '#FFB224';
-  const DIM = css.getPropertyValue('--ground-3').trim() || '#262923';
-
-  function sizeCanvas() {
-    const r = canvas.getBoundingClientRect();
-    dpr = Math.min(2, devicePixelRatio || 1);
-    cw = r.width; ch = r.height;
-    canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-
-  // Deterministic noise so the line feels like a sensor, not a sine.
-  const noise = (x) => {
-    const i = Math.floor(x), f = x - i;
-    const h = (n) => { const s = Math.sin(n * 127.1) * 43758.5453; return s - Math.floor(s); };
-    const u = f * f * (3 - 2 * f);
-    return h(i) * (1 - u) + h(i + 1) * u;
-  };
-
-  let lastTraceT = performance.now();
-  const g = (q, c, w) => Math.exp(-(((q - c) / w) ** 2));
-  function drawTrace(t) {
-    const dt = Math.min(50, t - lastTraceT); lastTraceT = t;
-    if (!traceVisible) return;
-    if (motion) phase += dt * 0.001;
-    pointer.energy += ((pointer.x > -999 ? 1 : 0) - pointer.energy) * 0.08;
-    ctx.clearRect(0, 0, cw, ch);
-    const mid = ch * 0.56;
-    const amp = ch * 0.19;
-
-    // dotted baseline
-    ctx.fillStyle = DIM;
-    for (let gx = 24; gx < cw; gx += 40) ctx.fillRect(gx, mid - 1, 3, 3);
-
-    const period = cw > 900 ? 0.26 : 0.5;
-    const s = 900 / Math.max(cw, 320); // keep the beat shape the same size in pixels
-    const yAt = (x) => {
-      const u = x / cw;
-      let v = Math.sin(u * 6 + phase * 1.7) * 0.12 + (noise(x * 0.05 + phase * 30) - 0.5) * 0.22;
-      // heartbeat-style complex, repeating and travelling left
-      let q = ((u + phase * 0.11) % period + period) % period - period * 0.5;
-      q /= s;
-      v += -0.35 * g(q, -0.05, 0.012) + 0.45 * g(q, -0.009, 0.0035) - 2.6 * g(q, 0, 0.0042)
-         + 0.95 * g(q, 0.009, 0.0038) - 0.55 * g(q, 0.065, 0.018);
-      // pointer excites the signal
-      const pd = (x - pointer.x) / Math.max(90, cw * 0.06);
-      const e = Math.exp(-pd * pd) * pointer.energy;
-      v += Math.sin(x * 0.28 + phase * 40) * e * 1.5;
-      return mid + v * amp;
-    };
-
-    ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    ctx.strokeStyle = INK;
-    ctx.beginPath();
-    for (let x = 0; x <= cw; x += 2) { const yy = yAt(x); x ? ctx.lineTo(x, yy) : ctx.moveTo(x, yy); }
-    ctx.stroke();
-
-    if (pointer.energy > 0.02 && pointer.x > -999) {
-      ctx.strokeStyle = ACC; ctx.globalAlpha = pointer.energy; ctx.lineWidth = 3.5;
-      ctx.beginPath();
-      const a = Math.max(0, pointer.x - 160), b = Math.min(cw, pointer.x + 160);
-      for (let x = a; x <= b; x += 2) { const yy = yAt(x); x === a ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy); }
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    }
-
-    const hx = cw - 28, hy = yAt(hx);
-    ctx.fillStyle = ACC;
-    ctx.beginPath(); ctx.arc(hx, hy, 7, 0, Math.PI * 2); ctx.fill();
-  }
-
-  function traceLoop(t) { drawTrace(t); requestAnimationFrame(traceLoop); }
-
-  const wrap = $('.trace-wrap');
-  const setP = (e) => { const r = canvas.getBoundingClientRect(); pointer.x = e.clientX - r.left; pointer.y = e.clientY - r.top; };
-  wrap.addEventListener('pointermove', setP, { passive: true });
-  wrap.addEventListener('pointerdown', setP, { passive: true });
-  wrap.addEventListener('pointerleave', () => { pointer.x = -9999; });
-  wrap.addEventListener('pointercancel', () => { pointer.x = -9999; });
-  new IntersectionObserver(([e]) => { traceVisible = e.isIntersecting; }).observe(wrap);
-
-  /* ---------- Cursor + magnetic buttons (fine pointers only) */
-  if (fine && motion) {
-    const cur = $('.cursor');
-    let cx = vw / 2, cy = vh / 2, tx = cx, ty = cy;
-    addEventListener('pointermove', (e) => { tx = e.clientX; ty = e.clientY; cur.classList.add('on'); }, { passive: true });
-    document.addEventListener('pointerleave', () => cur.classList.remove('on'));
-    const loop = () => {
-      cx += (tx - cx) * 0.22; cy += (ty - cy) * 0.22;
-      cur.style.transform = `translate3d(${cx.toFixed(1)}px,${cy.toFixed(1)}px,0)`;
-      requestAnimationFrame(loop);
-    };
-    loop();
-    document.addEventListener('pointerover', (e) => { if (e.target.closest('a, button')) cur.classList.add('big'); });
-    document.addEventListener('pointerout', (e) => { if (e.target.closest('a, button')) cur.classList.remove('big'); });
-
-    $$('[data-magnetic]').forEach((el) => {
-      el.addEventListener('pointermove', (e) => {
-        const r = el.getBoundingClientRect();
-        const mx = (e.clientX - r.left - r.width / 2) * 0.28;
-        const my = (e.clientY - r.top - r.height / 2) * 0.38;
-        el.style.transition = 'transform 120ms linear, background-color 200ms ease';
-        el.style.transform = `translate(${mx.toFixed(1)}px, ${my.toFixed(1)}px)`;
-      });
-      el.addEventListener('pointerleave', () => {
-        el.style.transition = 'transform 500ms cubic-bezier(0.34, 1.4, 0.64, 1), background-color 200ms ease';
-        el.style.transform = '';
-      });
     });
   }
 
-  /* ---------- Resize */
-  function onResize() {
-    vw = innerWidth; vh = innerHeight;
-    sizeCanvas(); layoutWork(); measureRows();
-  }
-  let rT;
-  addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(onResize, 120); });
+  /* ---------- Copy email */
+  const copy = $('#copyMail');
+  copy && copy.addEventListener('click', async () => {
+    const mail = 'dhruv.sharma06@somaiya.edu';
+    try { await navigator.clipboard.writeText(mail); DS.toast('Email copied'); }
+    catch (_) { DS.toast(mail); }
+  });
 
-  onResize();
-  if (!horizontal) panels.forEach((p) => panelIO.observe(p));
-  if (document.fonts) document.fonts.ready.then(() => { layoutWork(); measureRows(); });
-  requestAnimationFrame(frame);
-  requestAnimationFrame(traceLoop);
+  /* ---------- Showreel player: expands out of whatever was clicked */
+  const player = $('#player'), pv = $('#playerVideo'), thumbV = $('#thumbVideo');
+  const pToggle = $('#pToggle'), pClose = $('#pClose'), pTrack = $('#pTrack'), pFill = pTrack && pTrack.parentElement;
+  const pCur = $('#pCur'), pDur = $('#pDur');
+  let opener = null, originRect = null;
+  const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  const insetFrom = (r) => `inset(${r.top}px ${innerWidth - r.right}px ${innerHeight - r.bottom}px ${r.left}px round 6px)`;
+
+  function open(from, at) {
+    opener = from;
+    const src = from.closest('.reel-thumb') ? from.closest('.reel-thumb') : from;
+    originRect = src.getBoundingClientRect();
+    player.hidden = false;
+    document.body.style.overflow = 'hidden';
+    pv.preload = 'auto';
+    const startAt = at != null ? at : (thumbV && !isNaN(thumbV.currentTime) ? thumbV.currentTime : 0);
+    const go = () => { try { pv.currentTime = startAt; } catch (_) {} pv.play().catch(() => player.classList.add('paused')); };
+    if (pv.readyState >= 1) go(); else pv.addEventListener('loadedmetadata', go, { once: true });
+    player.classList.remove('paused');
+    thumbV && thumbV.pause();
+    if (motion) player.animate([{ clipPath: insetFrom(originRect) }, { clipPath: 'inset(0px 0px 0px 0px round 0px)' }], { duration: 700, easing: 'cubic-bezier(0.32, 0.72, 0, 1)' });
+    pToggle.focus();
+  }
+  function close() {
+    const done = () => {
+      player.hidden = true; pv.pause(); document.body.style.overflow = '';
+      thumbV && thumbV.play().catch(() => {});
+      opener && opener.focus({ preventScroll: true });
+    };
+    if (motion && originRect) {
+      const r = (opener && opener.closest('.reel-thumb')) ? opener.closest('.reel-thumb').getBoundingClientRect() : originRect;
+      const a = player.animate([{ clipPath: 'inset(0px 0px 0px 0px round 0px)' }, { clipPath: insetFrom(r) }], { duration: 420, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' });
+      a.onfinish = done;
+    } else done();
+  }
+  if (player) {
+    $$('[data-play]').forEach((b) => b.addEventListener('click', () => open(b, b.dataset.at != null ? parseFloat(b.dataset.at) : null)));
+    pClose.addEventListener('click', close);
+    const toggle = () => { if (pv.paused) pv.play().catch(() => {}); else pv.pause(); };
+    pToggle.addEventListener('click', toggle);
+    pv.addEventListener('click', toggle);
+    pv.addEventListener('play', () => { player.classList.remove('paused'); pToggle.setAttribute('aria-label', 'Pause'); });
+    pv.addEventListener('pause', () => { player.classList.add('paused'); pToggle.setAttribute('aria-label', 'Play'); });
+    pv.addEventListener('ended', () => { pv.currentTime = 0; pv.play().catch(() => {}); });
+    pv.addEventListener('loadedmetadata', () => { pDur.textContent = fmt(pv.duration); pTrack.setAttribute('aria-valuemax', Math.round(pv.duration)); });
+    const paint = () => {
+      const d = pv.duration || 32, p = clamp(pv.currentTime / d);
+      pTrack.style.setProperty('--p', p.toFixed(4));
+      pTrack.style.setProperty('--w', `${pTrack.clientWidth}px`);
+      pCur.textContent = fmt(pv.currentTime);
+      pTrack.setAttribute('aria-valuenow', Math.round(pv.currentTime));
+    };
+    DS.onFrame(() => { if (!player.hidden) paint(); });
+    pv.addEventListener('timeupdate', paint);
+    const seekTo = (clientX) => { const r = pTrack.getBoundingClientRect(); pv.currentTime = clamp((clientX - r.left) / r.width) * (pv.duration || 32); paint(); };
+    pTrack.addEventListener('pointerdown', (e) => {
+      pTrack.setPointerCapture(e.pointerId); seekTo(e.clientX);
+      const mv = (ev) => seekTo(ev.clientX);
+      pTrack.addEventListener('pointermove', mv);
+      pTrack.addEventListener('pointerup', () => pTrack.removeEventListener('pointermove', mv), { once: true });
+    });
+    pTrack.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { pv.currentTime = Math.min(pv.duration, pv.currentTime + 5); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { pv.currentTime = Math.max(0, pv.currentTime - 5); e.preventDefault(); }
+    });
+    addEventListener('keydown', (e) => {
+      if (player.hidden) return;
+      if (e.key === 'Escape') close();
+      if (e.key === ' ' && e.target === document.body) { e.preventDefault(); toggle(); }
+      if (e.key === 'Tab') { // keep focus inside the player
+        const f = [pToggle, pTrack, pClose]; const i = f.indexOf(document.activeElement);
+        if (e.shiftKey && i <= 0) { e.preventDefault(); pClose.focus(); }
+        else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); pToggle.focus(); }
+      }
+    });
+  }
+  // start the hero preview on the title card rather than the black opening frames
+  if (thumbV) {
+    const jump = () => { if (thumbV.currentTime < 2.5) { try { thumbV.currentTime = 4.2; } catch (_) {} } };
+    if (thumbV.readyState >= 1) jump(); else thumbV.addEventListener('loadedmetadata', jump, { once: true });
+  }
+  // the hero preview doesn't autoplay with reduced motion
+  if (!motion && thumbV) { thumbV.removeAttribute('autoplay'); thumbV.pause(); }
 })();
