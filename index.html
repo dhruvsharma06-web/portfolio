@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dhruv Sharma — Software & IoT Developer, Mumbai</title>
+<meta name="description" content="Dhruv Sharma is a software and IoT developer in Mumbai building Flutter apps, Java and FastAPI backends, and ESP32 sensor prototypes.">
+<meta name="theme-color" content="#0D0E0C">
+<meta property="og:title" content="Dhruv Sharma — Software & IoT Developer">
+<meta property="og:description" content="Apps, backends and ESP32 firmware, wired together. Based in Mumbai.">
+<meta property="og:type" content="website">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/display-black.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="styles.css">
+<script>
+  (function () {
+    var d = document.documentElement;
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      d.classList.add('motion');
+      // If the script never runs, show everything instead of leaving it hidden.
+      setTimeout(function () { if (!window.__motionReady) d.classList.remove('motion'); }, 2500);
+    }
+  })();
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="cursor" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <a class="wordmark" href="#top" aria-label="Dhruv Sharma, back to top">Dhruv Sharma</a>
+  <nav aria-label="Primary">
+    <ul>
+      <li><a href="#work">Work</a></li>
+      <li><a href="#research">Research</a></li>
+      <li><a href="#stack">Stack</a></li>
+      <li><a href="#education">Education</a></li>
+    </ul>
+  </nav>
+  <a class="btn btn-small" href="mailto:dhruv.sharma06@somaiya.edu" data-magnetic>Email me</a>
+</header>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero" id="top" aria-labelledby="hero-title">
+    <h1 id="hero-title" class="hero-title" aria-label="Dhruv Sharma">
+      <span class="line" aria-hidden="true"><span class="ch" style="--i:0">D</span><span class="ch" style="--i:1">h</span><span class="ch" style="--i:2">r</span><span class="ch" style="--i:3">u</span><span class="ch" style="--i:4">v</span></span>
+      <span class="line" aria-hidden="true"><span class="ch" style="--i:5">S</span><span class="ch" style="--i:6">h</span><span class="ch" style="--i:7">a</span><span class="ch" style="--i:8">r</span><span class="ch" style="--i:9">m</span><span class="ch" style="--i:10">a</span></span>
+    </h1>
+
+    <div class="trace-wrap">
+      <canvas class="trace" id="trace" aria-hidden="true"></canvas>
+      <p class="trace-note"><span class="dot" aria-hidden="true"></span><span class="fine-only">Move your cursor across the signal.</span><span class="touch-only">Drag across the signal.</span></p>
+    </div>
+
+    <div class="hero-foot">
+      <p class="hero-lede" data-reveal style="--i:6">Software and IoT developer in Mumbai. I build the app, the backend and the firmware, and wire up the sensors in between.</p>
+      <div class="hero-actions" data-reveal style="--i:7">
+        <a class="btn" href="#work" data-magnetic>See my work</a>
+        <a class="btn btn-ghost" href="https://github.com/dhruvsharma06-web" target="_blank" rel="noopener" data-magnetic>GitHub <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATEMENT -->
+  <section class="statement" id="about" aria-labelledby="about-title">
+    <div class="statement-pin">
+      <h2 id="about-title" class="h2" data-reveal="mask"><span>What I do</span></h2>
+      <p class="statement-text" id="statement">I study IT at K. J. Somaiya Institute of Technology, and most of what I build crosses a line: a Flutter app talking to an ESP32, a Java backend sitting on a real database, a dashboard that turns raw rows into a decision. Right now I'm doing research on a healthcare device for people living with haemophilia.</p>
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section class="work" id="work" aria-labelledby="work-title">
+    <div class="work-pin">
+      <div class="work-head">
+        <h2 id="work-title" class="h2" data-reveal="mask"><span>Selected work</span></h2>
+        <p class="work-sub" data-reveal style="--i:1">Six projects, from a rehab app to a water-quality probe.</p>
+      </div>
+      <ol class="track" id="track">
+
+        <li class="panel">
+          <div class="panel-text">
+            <h3 class="h3">HemoPhysio</h3>
+            <p class="tags">Flutter · Dart · FastAPI · Firebase · ESP32-S3</p>
+            <p>A physiotherapy and rehab app for people with haemophilia. The Flutter app runs on a FastAPI backend with Firebase sign-in and storage.</p>
+            <p>On the hardware side, an ESP32-S3 reads an MPU motion sensor and BioAmp muscle signals to track how each exercise is going.</p>
+          </div>
+          <figure class="viz"><svg viewBox="0 0 640 440" role="img" aria-label="Illustration: knee angle from the motion sensor rising and falling with each rep, and muscle activity bursting as the knee bends.">
+  <text x="30" y="44" class="vl" text-anchor="start">Knee angle, from the MPU motion sensor</text>
+  <path class="draw sig" pathLength="1" d="M30.0 200.0 L32.0 200.0 L34.0 200.0 L36.0 200.0 L38.0 200.0 L40.0 200.0 L42.0 200.0 L44.0 200.0 L46.0 200.0 L48.0 200.0 L50.0 200.0 L52.0 200.0 L54.0 200.0 L56.0 200.0 L58.0 200.0 L60.0 200.0 L62.0 200.0 L64.0 200.0 L66.0 200.0 L68.0 200.0 L70.0 200.0 L72.0 200.0 L74.0 200.0 L76.0 200.0 L78.0 200.0 L80.0 200.0 L82.0 198.3 L84.0 195.6 L86.0 192.2 L88.0 188.4 L90.0 184.2 L92.0 179.7 L94.0 175.0 L96.0 170.2 L98.0 165.1 L100.0 160.0 L102.0 154.8 L104.0 149.6 L106.0 144.4 L108.0 139.2 L110.0 134.1 L112.0 129.1 L114.0 124.3 L116.0 119.6 L118.0 115.1 L120.0 110.7 L122.0 106.7 L124.0 102.8 L126.0 99.3 L128.0 96.0 L130.0 93.1 L132.0 90.4 L134.0 88.2 L136.0 86.2 L138.0 84.6 L140.0 83.4 L142.0 82.6 L144.0 82.1 L146.0 82.0 L148.0 82.3 L150.0 83.0 L152.0 84.0 L154.0 85.5 L156.0 87.2 L158.0 89.4 L160.0 91.8 L162.0 94.7 L164.0 97.8 L166.0 101.2 L168.0 104.9 L170.0 108.9 L172.0 113.1 L174.0 117.5 L176.0 122.1 L178.0 126.9 L180.0 131.9 L182.0 136.9 L184.0 142.1 L186.0 147.3 L188.0 152.5 L190.0 157.7 L192.0 162.8 L194.0 167.9 L196.0 172.9 L198.0 177.7 L200.0 182.2 L202.0 186.6 L204.0 190.5 L206.0 194.1 L208.0 197.2 L210.0 199.5 L212.0 200.0 L214.0 200.0 L216.0 200.0 L218.0 200.0 L220.0 200.0 L222.0 200.0 L224.0 200.0 L226.0 200.0 L228.0 200.0 L230.0 200.0 L232.0 200.0 L234.0 200.0 L236.0 200.0 L238.0 200.0 L240.0 200.0 L242.0 200.0 L244.0 200.0 L246.0 200.0 L248.0 200.0 L250.0 200.0 L252.0 200.0 L254.0 200.0 L256.0 200.0 L258.0 200.0 L260.0 200.0 L262.0 200.0 L264.0 200.0 L266.0 200.0 L268.0 200.0 L270.0 200.0 L272.0 200.0 L274.0 200.0 L276.0 200.0 L278.0 200.0 L280.0 200.0 L282.0 200.0 L284.0 200.0 L286.0 200.0 L288.0 200.0 L290.0 200.0 L292.0 200.0 L294.0 200.0 L296.0 200.0 L298.0 200.0 L300.0 200.0 L302.0 200.0 L304.0 200.0 L306.0 200.0 L308.0 200.0 L310.0 200.0 L312.0 200.0 L314.0 200.0 L316.0 200.0 L318.0 200.0 L320.0 200.0 L322.0 200.0 L324.0 200.0 L326.0 200.0 L328.0 200.0 L330.0 200.0 L332.0 200.0 L334.0 200.0 L336.0 200.0 L338.0 200.0 L340.0 200.0 L342.0 199.9 L344.0 198.1 L346.0 195.3 L348.0 191.8 L350.0 188.0 L352.0 183.8 L354.0 179.3 L356.0 174.6 L358.0 169.7 L360.0 164.6 L362.0 159.5 L364.0 154.3 L366.0 149.1 L368.0 143.9 L370.0 138.7 L372.0 133.6 L374.0 128.6 L376.0 123.8 L378.0 119.1 L380.0 114.6 L382.0 110.3 L384.0 106.3 L386.0 102.5 L388.0 98.9 L390.0 95.7 L392.0 92.8 L394.0 90.2 L396.0 87.9 L398.0 86.0 L400.0 84.5 L402.0 83.3 L404.0 82.5 L406.0 82.1 L408.0 82.0 L410.0 82.4 L412.0 83.1 L414.0 84.2 L416.0 85.6 L418.0 87.4 L420.0 89.6 L422.0 92.1 L424.0 95.0 L426.0 98.1 L428.0 101.6 L430.0 105.3 L432.0 109.3 L434.0 113.5 L436.0 118.0 L438.0 122.6 L440.0 127.4 L442.0 132.4 L444.0 137.4 L446.0 142.6 L448.0 147.8 L450.0 153.0 L452.0 158.2 L454.0 163.3 L456.0 168.4 L458.0 173.3 L460.0 178.1 L462.0 182.7 L464.0 187.0 L466.0 190.9 L468.0 194.5 L470.0 197.4 L472.0 199.6 L474.0 200.0 L476.0 200.0 L478.0 200.0 L480.0 200.0 L482.0 200.0 L484.0 200.0 L486.0 200.0 L488.0 200.0 L490.0 200.0 L492.0 200.0 L494.0 200.0 L496.0 200.0 L498.0 200.0 L500.0 200.0 L502.0 200.0 L504.0 200.0 L506.0 200.0 L508.0 200.0 L510.0 200.0 L512.0 200.0 L514.0 200.0 L516.0 200.0 L518.0 200.0 L520.0 200.0 L522.0 200.0 L524.0 200.0 L526.0 200.0 L528.0 200.0 L530.0 200.0 L532.0 200.0 L534.0 200.0 L536.0 200.0 L538.0 200.0 L540.0 200.0 L542.0 200.0 L544.0 200.0 L546.0 200.0 L548.0 200.0 L550.0 200.0 L552.0 200.0 L554.0 200.0 L556.0 200.0 L558.0 200.0 L560.0 200.0 L562.0 200.0 L564.0 200.0 L566.0 200.0 L568.0 200.0 L570.0 200.0 L572.0 200.0 L574.0 200.0 L576.0 200.0 L578.0 200.0 L580.0 200.0 L582.0 200.0 L584.0 200.0 L586.0 200.0 L588.0 200.0 L590.0 200.0 L592.0 200.0 L594.0 200.0 L596.0 200.0 L598.0 200.0 L600.0 200.0 L602.0 200.0 L604.0 199.8 L606.0 197.8 L608.0 194.9 L610.0 191.5"/>
+  <text x="30" y="252" class="vl" text-anchor="start">Muscle activity, from BioAmp</text>
+  <path class="draw sig accent" pathLength="1" d="M30.0 327.1 L32.0 324.0 L34.0 332.7 L36.0 322.1 L38.0 330.7 L40.0 327.3 L42.0 320.9 L44.0 330.2 L46.0 319.9 L48.0 328.5 L50.0 320.1 L52.0 320.3 L54.0 328.2 L56.0 338.0 L58.0 320.6 L60.0 323.0 L62.0 333.3 L64.0 341.7 L66.0 332.0 L68.0 327.2 L70.0 342.8 L72.0 273.8 L74.0 374.7 L76.0 303.6 L78.0 285.2 L80.0 281.8 L82.0 305.9 L84.0 369.7 L86.0 290.2 L88.0 340.1 L90.0 347.0 L92.0 314.5 L94.0 335.7 L96.0 278.6 L98.0 279.2 L100.0 296.8 L102.0 349.9 L104.0 322.2 L106.0 310.6 L108.0 338.6 L110.0 325.4 L112.0 311.3 L114.0 356.3 L116.0 347.0 L118.0 309.3 L120.0 335.7 L122.0 331.8 L124.0 355.2 L126.0 344.3 L128.0 317.9 L130.0 355.0 L132.0 312.1 L134.0 326.6 L136.0 339.3 L138.0 319.3 L140.0 329.7 L142.0 321.0 L144.0 332.4 L146.0 332.6 L148.0 330.7 L150.0 333.8 L152.0 328.1 L154.0 332.0 L156.0 330.9 L158.0 330.8 L160.0 329.6 L162.0 333.4 L164.0 334.4 L166.0 329.7 L168.0 331.6 L170.0 325.6 L172.0 332.0 L174.0 331.5 L176.0 334.9 L178.0 333.2 L180.0 327.8 L182.0 328.9 L184.0 331.7 L186.0 325.2 L188.0 329.6 L190.0 326.7 L192.0 326.2 L194.0 325.6 L196.0 332.7 L198.0 326.3 L200.0 327.5 L202.0 328.9 L204.0 333.7 L206.0 325.8 L208.0 329.5 L210.0 330.5 L212.0 333.8 L214.0 333.2 L216.0 333.6 L218.0 327.8 L220.0 329.2 L222.0 328.6 L224.0 333.8 L226.0 334.6 L228.0 326.5 L230.0 326.8 L232.0 327.3 L234.0 327.3 L236.0 329.8 L238.0 330.9 L240.0 327.6 L242.0 325.0 L244.0 329.2 L246.0 328.7 L248.0 330.7 L250.0 334.5 L252.0 331.9 L254.0 330.2 L256.0 331.2 L258.0 331.8 L260.0 325.5 L262.0 334.0 L264.0 332.8 L266.0 333.7 L268.0 333.0 L270.0 328.9 L272.0 329.0 L274.0 326.0 L276.0 331.3 L278.0 325.3 L280.0 325.0 L282.0 326.4 L284.0 325.6 L286.0 327.8 L288.0 323.4 L290.0 322.2 L292.0 324.3 L294.0 323.2 L296.0 327.6 L298.0 321.2 L300.0 337.2 L302.0 332.3 L304.0 322.7 L306.0 324.7 L308.0 326.6 L310.0 326.9 L312.0 321.3 L314.0 338.3 L316.0 341.9 L318.0 329.2 L320.0 329.6 L322.0 319.5 L324.0 319.7 L326.0 325.9 L328.0 323.8 L330.0 338.8 L332.0 320.9 L334.0 270.9 L336.0 386.3 L338.0 333.5 L340.0 285.5 L342.0 335.4 L344.0 270.5 L346.0 333.5 L348.0 389.7 L350.0 375.0 L352.0 354.0 L354.0 301.1 L356.0 314.1 L358.0 290.9 L360.0 361.3 L362.0 333.7 L364.0 360.7 L366.0 311.8 L368.0 301.2 L370.0 361.3 L372.0 377.0 L374.0 362.8 L376.0 357.3 L378.0 357.0 L380.0 349.3 L382.0 309.2 L384.0 331.3 L386.0 320.4 L388.0 300.9 L390.0 303.3 L392.0 318.6 L394.0 318.9 L396.0 337.9 L398.0 346.2 L400.0 328.4 L402.0 340.7 L404.0 339.3 L406.0 336.1 L408.0 328.6 L410.0 327.2 L412.0 327.3 L414.0 327.0 L416.0 327.0 L418.0 331.2 L420.0 334.0 L422.0 333.4 L424.0 329.8 L426.0 331.5 L428.0 333.0 L430.0 325.8 L432.0 331.6 L434.0 334.1 L436.0 332.8 L438.0 332.5 L440.0 329.8 L442.0 326.8 L444.0 332.9 L446.0 328.3 L448.0 333.0 L450.0 334.7 L452.0 329.0 L454.0 329.0 L456.0 334.5 L458.0 332.2 L460.0 326.7 L462.0 326.3 L464.0 326.5 L466.0 334.0 L468.0 333.1 L470.0 326.5 L472.0 333.3 L474.0 334.8 L476.0 331.6 L478.0 328.5 L480.0 330.5 L482.0 326.3 L484.0 325.1 L486.0 334.7 L488.0 331.5 L490.0 330.3 L492.0 334.3 L494.0 329.3 L496.0 333.7 L498.0 333.3 L500.0 327.1 L502.0 327.5 L504.0 327.9 L506.0 327.4 L508.0 330.9 L510.0 327.6 L512.0 329.2 L514.0 326.3 L516.0 334.1 L518.0 328.5 L520.0 329.6 L522.0 330.8 L524.0 334.0 L526.0 329.2 L528.0 334.2 L530.0 330.0 L532.0 330.3 L534.0 330.2 L536.0 325.2 L538.0 329.4 L540.0 326.6 L542.0 324.2 L544.0 333.7 L546.0 325.7 L548.0 329.6 L550.0 333.4 L552.0 330.9 L554.0 327.1 L556.0 330.3 L558.0 331.0 L560.0 335.3 L562.0 322.3 L564.0 331.2 L566.0 324.8 L568.0 325.2 L570.0 336.0 L572.0 330.2 L574.0 331.4 L576.0 336.2 L578.0 340.0 L580.0 328.6 L582.0 332.8 L584.0 330.1 L586.0 330.3 L588.0 335.0 L590.0 328.7 L592.0 330.9 L594.0 329.4 L596.0 384.8 L598.0 354.9 L600.0 377.3 L602.0 385.7 L604.0 299.7 L606.0 337.5 L608.0 385.6 L610.0 372.4" style="--d:.25s"/>
+</svg></figure>
+        </li>
+
+        <li class="panel">
+          <div class="panel-text">
+            <h3 class="h3">Fieldwise</h3>
+            <p class="tags">HTML · CSS · JavaScript</p>
+            <p>A farm and irrigation simulator. Pick a crop and a weather scenario, then run thirty days.</p>
+            <p>It schedules irrigation and tracks soil moisture and crop vitality day by day, using simplified simulation rules.</p>
+          </div>
+          <figure class="viz"><svg viewBox="0 0 640 440" role="img" aria-label="Illustration: thirty bars of soil moisture slowly falling, refilled on irrigation days.">
+  <text x="40" y="44" class="vl" text-anchor="start">Soil moisture, day 1 to day 30</text>
+  <rect class="mark static" x="40" y="62" width="12" height="10"/><text x="60" y="72" class="vl small" text-anchor="start">Irrigation day</text>
+  <rect class="bar" style="--i:0" x="40.0" y="140.6" width="12.7" height="249.4"/><rect class="bar" style="--i:1" x="58.7" y="157.7" width="12.7" height="232.3"/><rect class="bar" style="--i:2" x="77.3" y="174.8" width="12.7" height="215.2"/><rect class="bar" style="--i:3" x="96.0" y="194.5" width="12.7" height="195.5"/><rect class="bar" style="--i:4" x="114.7" y="211.1" width="12.7" height="178.9"/><rect class="bar" style="--i:5" x="133.3" y="229.2" width="12.7" height="160.8"/><rect class="bar" style="--i:6" x="152.0" y="245.8" width="12.7" height="144.2"/><rect class="bar" style="--i:7" x="170.7" y="267.5" width="12.7" height="122.5"/><rect class="bar" style="--i:8" x="189.3" y="290.3" width="12.7" height="99.7"/><rect class="bar" style="--i:9" x="208.0" y="123.2" width="12.7" height="266.8"/><rect class="bar" style="--i:10" x="226.7" y="140.5" width="12.7" height="249.5"/><rect class="bar" style="--i:11" x="245.3" y="162.7" width="12.7" height="227.3"/><rect class="bar" style="--i:12" x="264.0" y="184.4" width="12.7" height="205.6"/><rect class="bar" style="--i:13" x="282.7" y="201.6" width="12.7" height="188.4"/><rect class="bar" style="--i:14" x="301.3" y="225.2" width="12.7" height="164.8"/><rect class="bar" style="--i:15" x="320.0" y="249.6" width="12.7" height="140.4"/><rect class="bar" style="--i:16" x="338.7" y="267.4" width="12.7" height="122.6"/><rect class="bar" style="--i:17" x="357.3" y="123.2" width="12.7" height="266.8"/><rect class="bar" style="--i:18" x="376.0" y="142.6" width="12.7" height="247.4"/><rect class="bar" style="--i:19" x="394.7" y="162.8" width="12.7" height="227.2"/><rect class="bar" style="--i:20" x="413.3" y="187.4" width="12.7" height="202.6"/><rect class="bar" style="--i:21" x="432.0" y="210.6" width="12.7" height="179.4"/><rect class="bar" style="--i:22" x="450.7" y="227.9" width="12.7" height="162.1"/><rect class="bar" style="--i:23" x="469.3" y="247.6" width="12.7" height="142.4"/><rect class="bar" style="--i:24" x="488.0" y="268.1" width="12.7" height="121.9"/><rect class="bar" style="--i:25" x="506.7" y="287.0" width="12.7" height="103.0"/><rect class="bar" style="--i:26" x="525.3" y="123.2" width="12.7" height="266.8"/><rect class="bar" style="--i:27" x="544.0" y="141.9" width="12.7" height="248.1"/><rect class="bar" style="--i:28" x="562.7" y="164.2" width="12.7" height="225.8"/><rect class="bar" style="--i:29" x="581.3" y="180.3" width="12.7" height="209.7"/><rect class="mark" style="--i:9" x="208.0" y="101.2" width="12.7" height="10"/><rect class="mark" style="--i:17" x="357.3" y="101.2" width="12.7" height="10"/><rect class="mark" style="--i:26" x="525.3" y="101.2" width="12.7" height="10"/>
+  <text x="40" y="420" class="vl small" text-anchor="start">Day 1</text><text x="600" y="420" class="vl small" text-anchor="end">Day 30</text>
+</svg></figure>
+        </li>
+
+        <li class="panel">
+          <div class="panel-text">
+            <h3 class="h3">SkillConnect</h3>
+            <p class="tags">Java · JSP · Servlets · JDBC · MySQL · Tomcat</p>
+            <p>A full-stack platform that connects skilled professionals with the people who need them.</p>
+            <p>Built on MVC, with login, session management, database integration and full create, read, update and delete.</p>
+          </div>
+          <figure class="viz"><svg viewBox="0 0 640 440" role="img" aria-label="Diagram: a request travels from the browser to JSP views, servlet controllers, JDBC models and MySQL, all running on Apache Tomcat.">
+  <rect class="tone" x="40" y="112" width="560" height="262"/><text x="588" y="140" class="vl small" text-anchor="end">Apache Tomcat</text><g class="blk" style="--i:0"><rect class="fill2" x="60" y="14" width="220" height="44"/><text x="78" y="42" class="vl strong" text-anchor="start">Browser</text></g><path class="draw sig accent" pathLength="1" style="--d:0.15s" d="M86 58 L86 102"/><g class="blk" style="--i:1"><rect class="fill" x="60" y="102" width="340" height="44"/><text x="78" y="130" class="vl strong" text-anchor="start">JSP views</text></g><path class="draw sig accent" pathLength="1" style="--d:0.33s" d="M86 146 L86 190"/><g class="blk" style="--i:2"><rect class="fill" x="60" y="190" width="420" height="44"/><text x="78" y="218" class="vl strong" text-anchor="start">Servlet controllers</text></g><path class="draw sig accent" pathLength="1" style="--d:0.51s" d="M86 234 L86 278"/><g class="blk" style="--i:3"><rect class="fill" x="60" y="278" width="300" height="44"/><text x="78" y="306" class="vl strong" text-anchor="start">JDBC models</text></g><path class="draw sig accent" pathLength="1" style="--d:0.69s" d="M86 322 L86 366"/><g class="blk" style="--i:4"><rect class="fill2" x="60" y="366" width="200" height="44"/><text x="78" y="394" class="vl strong" text-anchor="start">MySQL</text></g>
+</svg></figure>
+        </li>
+
+        <li class="panel">
+          <div class="panel-text">
+            <h3 class="h3">Pura Air</h3>
+            <p class="tags">ESP32 · MQTT · IoT</p>
+            <p>Real-time indoor air quality monitoring, with several sensors feeding one ESP32 and publishing over MQTT.</p>
+            <p>The architecture leaves room for AI-based prediction and cloud connectivity next.</p>
+          </div>
+          <figure class="viz"><svg viewBox="0 0 640 440" role="img" aria-label="Illustration: an air quality gauge reading in the moderate band, fed by ESP32 sensors over MQTT.">
+  <text x="40" y="44" class="vl" text-anchor="start">Indoor air quality, live</text>
+  <path class="gtrack" d="M130 290 A190 190 0 0 1 510 290"/>
+  <path class="draw gauge" pathLength="1" d="M130 290 A190 190 0 0 1 510 290" style="--to:.38"/>
+  <g class="needle" style="--deg:21deg"><path d="M320 290 L320 140"/><circle cx="320" cy="290" r="12"/></g>
+  <text x="130" y="330" class="vl small" text-anchor="start">Good</text><text x="510" y="330" class="vl small" text-anchor="end">Poor</text>
+  <text x="320" y="330" class="vl strong" text-anchor="middle">Moderate</text>
+  <text x="40" y="414" class="vl small" text-anchor="start">ESP32 sensors  →  MQTT  →  dashboard</text>
+</svg></figure>
+        </li>
+
+        <li class="panel">
+          <div class="panel-text">
+            <h3 class="h3">Pura Aqua</h3>
+            <p class="tags">ESP32 · Embedded systems</p>
+            <p>An affordable water-quality probe that reads pH, TDS, turbidity and temperature.</p>
+            <p>Embedded logic assesses each sample in real time and recommends how to purify it.</p>
+          </div>
+          <figure class="viz"><svg viewBox="0 0 640 440" role="img" aria-label="Illustration: pH, TDS, turbidity and temperature readings, and a purification verdict.">
+  <text x="40" y="44" class="vl" text-anchor="start">Water sample, four sensors</text><text x="40" y="100" class="vl strong" text-anchor="start">pH</text><text x="600" y="100" class="vl" text-anchor="end">7.2</text><rect class="tone" x="40" y="114" width="560" height="22"/><rect class="hbar" style="--i:0" x="40" y="114" width="325" height="22"/><text x="40" y="172" class="vl strong" text-anchor="start">TDS</text><text x="600" y="172" class="vl" text-anchor="end">180 ppm</text><rect class="tone" x="40" y="186" width="560" height="22"/><rect class="hbar" style="--i:1" x="40" y="186" width="202" height="22"/><text x="40" y="244" class="vl strong" text-anchor="start">Turbidity</text><text x="600" y="244" class="vl" text-anchor="end">2.1 NTU</text><rect class="tone" x="40" y="258" width="560" height="22"/><rect class="hbar" style="--i:2" x="40" y="258" width="123" height="22"/><text x="40" y="316" class="vl strong" text-anchor="start">Temperature</text><text x="600" y="316" class="vl" text-anchor="end">26 °C</text><rect class="tone" x="40" y="330" width="560" height="22"/><rect class="hbar" style="--i:3" x="40" y="330" width="291" height="22"/><rect class="fill" x="40" y="388" width="560" height="44"/><text x="58" y="416" class="vl strong dark" text-anchor="start">Verdict: safe after filtering</text>
+</svg></figure>
+        </li>
+
+        <li class="panel">
+          <div class="panel-text">
+            <h3 class="h3">WelfareWatch</h3>
+            <p class="tags">SQL · Data analytics · Dashboards</p>
+            <p>Interactive dashboards that check how welfare schemes are actually being delivered.</p>
+            <p>Visual reports compare performance indicators and beneficiary trends across schemes.</p>
+          </div>
+          <figure class="viz"><svg viewBox="0 0 640 440" role="img" aria-label="Illustration: grouped bars comparing planned and reached beneficiaries for five schemes.">
+  <text x="40" y="44" class="vl" text-anchor="start">Beneficiaries planned vs. reached, by scheme</text><rect class="tone" x="40" y="62" width="12" height="10"/><text x="60" y="72" class="vl small" text-anchor="start">Planned</text><rect class="mark static" x="150" y="62" width="12" height="10"/><text x="170" y="72" class="vl small" text-anchor="start">Reached</text><rect class="bar tone" style="--i:0" x="50" y="138" width="40" height="252"/><rect class="bar mark" style="--i:1" x="94" y="188" width="40" height="202"/><text x="92" y="420" class="vl small" text-anchor="middle">Scheme A</text><rect class="bar tone" style="--i:2" x="162" y="166" width="40" height="224"/><rect class="bar mark" style="--i:3" x="206" y="275" width="40" height="115"/><text x="204" y="420" class="vl small" text-anchor="middle">Scheme B</text><rect class="bar tone" style="--i:4" x="274" y="124" width="40" height="266"/><rect class="bar mark" style="--i:5" x="318" y="144" width="40" height="246"/><text x="316" y="420" class="vl small" text-anchor="middle">Scheme C</text><rect class="bar tone" style="--i:6" x="386" y="194" width="40" height="196"/><rect class="bar mark" style="--i:7" x="430" y="306" width="40" height="84"/><text x="428" y="420" class="vl small" text-anchor="middle">Scheme D</text><rect class="bar tone" style="--i:8" x="498" y="152" width="40" height="238"/><rect class="bar mark" style="--i:9" x="542" y="214" width="40" height="176"/><text x="540" y="420" class="vl small" text-anchor="middle">Scheme E</text>
+</svg></figure>
+        </li>
+
+      </ol>
+      <p class="viz-note">Charts are illustrations of what each project measures, not live data.</p>
+    </div>
+  </section>
+
+  <!-- RESEARCH -->
+  <section class="research" id="research" aria-labelledby="research-title">
+    <div class="research-field">
+      <h2 id="research-title" class="h2" data-reveal="mask"><span>Research</span></h2>
+      <div class="research-list">
+        <article class="role" data-reveal style="--i:1">
+          <p class="when">July 2026 to now</p>
+          <h3 class="role-title">Building a monitoring device for haemophilia patients</h3>
+          <p class="where">Research intern, K. J. Somaiya College of Physiotherapy, Mumbai</p>
+          <p>I work with a mixed team of physiotherapists and engineers on an IoT healthcare device for monitoring and patient support, handling hardware integration, sensor interfacing, embedded code and prototype testing.</p>
+        </article>
+        <article class="role" data-reveal style="--i:2">
+          <p class="when">One month</p>
+          <h3 class="role-title">An indoor air quality system with IoT and AI</h3>
+          <p class="where">Research intern, R&amp;D Cell, K. J. Somaiya Institute of Technology, Mumbai</p>
+          <p>With faculty mentors, I helped design the prototype, integrate the hardware, validate it and write the technical documentation.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <section class="stack" id="stack" aria-labelledby="stack-title">
+    <div class="stack-head">
+      <h2 id="stack-title" class="h2" data-reveal="mask"><span>What I build with</span></h2>
+    </div>
+    <div class="rows">
+      <div class="row" data-dir="1"><h3 class="row-label">Languages</h3><div class="strip"><ul><li>Java</li><li>Python</li><li>Dart</li><li>JavaScript</li><li>C</li><li>SQL</li></ul></div></div>
+      <div class="row" data-dir="-1"><h3 class="row-label">Web and mobile</h3><div class="strip"><ul><li>Flutter</li><li>HTML</li><li>CSS</li><li>JSP</li><li>Servlets</li><li>JDBC</li></ul></div></div>
+      <div class="row" data-dir="1"><h3 class="row-label">Backend and APIs</h3><div class="strip"><ul><li>FastAPI</li><li>REST APIs</li><li>Apache Tomcat</li></ul></div></div>
+      <div class="row" data-dir="-1"><h3 class="row-label">Data and cloud</h3><div class="strip"><ul><li>MySQL</li><li>MongoDB</li><li>Firebase Auth</li><li>Cloud Firestore</li><li>Google Cloud</li></ul></div></div>
+      <div class="row hot" data-dir="1"><h3 class="row-label">IoT and embedded</h3><div class="strip"><ul><li>ESP32</li><li>Arduino IDE</li><li>MQTT</li><li>Sensor interfacing</li></ul></div></div>
+      <div class="row" data-dir="-1"><h3 class="row-label">Tools</h3><div class="strip"><ul><li>Git</li><li>GitHub</li></ul></div></div>
+      <div class="row" data-dir="1"><h3 class="row-label">Fundamentals</h3><div class="strip"><ul><li>Data structures and algorithms</li><li>DBMS</li><li>Software engineering</li><li>Operating systems</li><li>Computer networks</li></ul></div></div>
+    </div>
+  </section>
+
+  <!-- EDUCATION -->
+  <section class="education" id="education" aria-labelledby="edu-title">
+    <h2 id="edu-title" class="h2" data-reveal="mask"><span>Education</span></h2>
+    <div class="edu-grid">
+      <div class="edu-main" data-reveal style="--i:1">
+        <p class="edu-degree">B.Tech in Information Technology</p>
+        <p class="edu-school">K. J. Somaiya Institute of Technology, Mumbai</p>
+      </div>
+      <dl class="edu-facts" data-reveal style="--i:2">
+        <div><dt>CGPA</dt><dd><span class="count" data-to="9.2">9.2</span></dd></div>
+        <div><dt>Graduating</dt><dd>2028</dd></div>
+      </dl>
+      <p class="edu-how" data-reveal style="--i:3">How I work with people: I solve problems, collaborate and lead in teams, communicate clearly, learn fast and manage my time.</p>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact" aria-labelledby="contact-title">
+    <h2 id="contact-title" class="h2 contact-title" data-reveal="mask"><span>Got a sensor with no software? Or the reverse?</span></h2>
+    <p class="contact-sub" data-reveal style="--i:1">I'm open to internships, research projects and hackathon teams. Email is the quickest way to reach me.</p>
+    <a class="mail" href="mailto:dhruv.sharma06@somaiya.edu" data-reveal style="--i:2"><span class="mail-text">dhruv.sharma06@somaiya.edu</span></a>
+    <ul class="contact-list" data-reveal style="--i:3">
+      <li><a href="https://github.com/dhruvsharma06-web" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a></li>
+      <li><a href="tel:+919099990328">+91 90999 90328</a></li>
+      <li>Mumbai, India</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="footer" id="footer">
+  <p class="foot-name" aria-label="Dhruv Sharma"><span aria-hidden="true"><span class="ch" style="--i:0">D</span><span class="ch" style="--i:1">h</span><span class="ch" style="--i:2">r</span><span class="ch" style="--i:3">u</span><span class="ch" style="--i:4">v</span><span class="ch sp" style="--i:5"> </span><span class="ch" style="--i:6">S</span><span class="ch" style="--i:7">h</span><span class="ch" style="--i:8">a</span><span class="ch" style="--i:9">r</span><span class="ch" style="--i:10">m</span><span class="ch" style="--i:11">a</span></span></p>
+  <div class="foot-row">
+    <p>© 2026 Dhruv Sharma</p>
+    <a href="#top">Back to top <span aria-hidden="true">↑</span></a>
+  </div>
+</footer>
+
+<script src="main.js" defer></script>
+</body>
+</html>
