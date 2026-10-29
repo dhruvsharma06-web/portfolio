@@ -7,6 +7,8 @@ Static site (HTML, CSS, JavaScript). No build step, no dependencies.
 - `core.js` — shared motion: scroll-driven WebGL particle film (interactive name), cursor, kinetic titles, intro, page transitions
 - `main.js` — home page interactions and the showreel player
 - `media/reel.mp4` — 32-second showreel (rendered from code)
+- `404.html` — custom not-found page; `Dhruv_Sharma_Resume.pdf` — résumé download
+- `media/og.jpg` — link preview image for LinkedIn, WhatsApp and X
 
 ## Deploy on Vercel
 Import this repo at vercel.com/new, framework preset **Other**, leave build settings empty, Deploy.

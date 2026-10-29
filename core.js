@@ -27,14 +27,16 @@
 
   if (gl && motion) (() => {
     const small = Math.min(innerWidth, innerHeight) < 700;
-    const N = small ? 9000 : 24000;
+    const weak = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+    const N = small ? (weak ? 6000 : 9000) : (weak ? 14000 : 24000);
     const VS = `
 attribute vec3 aFrom; attribute vec3 aTo; attribute vec4 aR;
 uniform vec2 uView; uniform float uD, uT, uTime, uDpr, uIntro, uHeroY;
 uniform vec3 uFromOff, uToOff; uniform float uFromKind, uToKind, uFromSize, uToSize;
-uniform vec2 uMouse; uniform float uPush; uniform float uShapeA;
+uniform vec2 uMouse; uniform float uPush; uniform float uShapeA; uniform vec4 uClicks[3];
 uniform vec3 uFromC1, uFromC2, uToC1, uToC2; uniform vec4 uFromAx, uToAx;
 varying float vA; varying vec3 vCol;
+vec3 spec(float x){ return clamp(abs(mod(x*6.+vec3(0.,4.,2.),6.)-3.)-1.,0.,1.); }
 vec3 rotY(vec3 p, float a){ float c=cos(a), s=sin(a); return vec3(c*p.x+s*p.z, p.y, -s*p.x+c*p.z); }
 vec3 rotX(vec3 p, float a){ float c=cos(a), s=sin(a); return vec3(p.x, c*p.y-s*p.z, s*p.y+c*p.z); }
 vec3 animate(vec3 p, float kind, vec4 r){
@@ -73,10 +75,24 @@ void main(){
   vec2 d = p.xy - uMouse; float dl = length(d);
   float push = (1. - smoothstep(0., 140., dl)) * uPush;
   p.xy += normalize(d + .0001) * push * push * 26.;
+  // prism ripple: each click sends a shockwave that paints the ring in full spectrum
+  float flash = 0.; vec3 fcol = vec3(0.);
+  for (int c = 0; c < 3; c++) {
+    vec4 ck = uClicks[c]; float ct = uTime - ck.z;
+    if (ct > 0. && ct < 3.2) {
+      vec2 dv = p.xy - ck.xy; float len = length(dv);
+      float rd = abs(len - ct * 620.);
+      float wv = (1. - smoothstep(0., 70. + ct * 40., rd)) * exp(-ct * 1.15);
+      p.xy += dv / (len + .001) * wv * 42.;
+      p.z += wv * 120.;
+      float ang = atan(dv.y, dv.x) / 6.2832 + .5 + ct * .15;
+      fcol += mix(spec(fract(ang)), vec3(1.), .2) * wv; flash += wv;
+    }
+  }
   float w = uD - p.z;
   gl_Position = vec4(p.x/(uView.x*.5)*uD, p.y/(uView.y*.5)*uD, 0., w);
   float size = mix(uFromSize, uToSize, k);
-  gl_PointSize = max(1., size * uD / w * uDpr * (1. + push*.25));
+  gl_PointSize = max(1., size * uD / w * uDpr * (1. + push*.25 + flash*.9));
   float depth = clamp(uD / w, .2, 1.4);
   vA = mix(1., uShapeA, step(.5, mix(uFromKind, uToKind, k))) * depth * (.6 + .4*aR.y) * ik;
   float ga = clamp(dot(aFrom, uFromAx.xyz) * uFromAx.w + .5 + (aR.x - .5)*.3, 0., 1.);
@@ -84,6 +100,8 @@ void main(){
   vec3 ca = mix(uFromC1, uFromC2, ga), cb = mix(uToC1, uToC2, gb);
   vCol = mix(ca, cb, k);
   vCol = mix(vCol, vec3(1.), .18 * aR.z);     // a few brighter, whiter sparks
+  vCol = mix(vCol, fcol / max(flash, .001), clamp(flash * 1.6, 0., 1.));
+  vA = max(vA, flash * .9 * ik);
 }`;
     const FS = `precision mediump float;
 varying float vA; varying vec3 vCol;
@@ -98,7 +116,7 @@ void main(){
     if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return;
     gl.useProgram(pr);
     gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    const U = {}; ['uView','uD','uT','uTime','uDpr','uIntro','uHeroY','uFromOff','uToOff','uFromKind','uToKind','uFromSize','uToSize','uMouse','uPush','uShapeA','uFromC1','uFromC2','uToC1','uToC2','uFromAx','uToAx'].forEach((k) => (U[k] = gl.getUniformLocation(pr, k)));
+    const U = {}; ['uView','uD','uT','uTime','uDpr','uIntro','uHeroY','uFromOff','uToOff','uFromKind','uToKind','uFromSize','uToSize','uMouse','uPush','uShapeA','uFromC1','uFromC2','uToC1','uToC2','uFromAx','uToAx','uClicks'].forEach((k) => (U[k] = gl.getUniformLocation(pr, k)));
     const A = { from: gl.getAttribLocation(pr, 'aFrom'), to: gl.getAttribLocation(pr, 'aTo'), r: gl.getAttribLocation(pr, 'aR') };
 
     // per-particle randoms
@@ -259,6 +277,17 @@ void main(){
     const mouse = { x: -9999, y: -9999, tx: -9999, ty: -9999 }; let push = 0;
     addEventListener('pointermove', (e) => { mouse.tx = e.clientX - state.vw / 2; mouse.ty = state.vh / 2 - e.clientY; }, { passive: true });
     document.addEventListener('pointerleave', () => { mouse.tx = mouse.ty = -9999; });
+    const clicks = new Float32Array(12).fill(-100); let ci = 0;
+    addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || e.target.closest('a, button, input, [role="slider"], .player, .card-inner, .stack-grid')) return;
+      const k = ci++ % 3;
+      clicks[k * 4] = e.clientX - state.vw / 2; clicks[k * 4 + 1] = state.vh / 2 - e.clientY; clicks[k * 4 + 2] = performance.now() / 1000; clicks[k * 4 + 3] = 1;
+      // a thin spectrum ring on the glass
+      const r = document.createElement('div'); r.className = 'prism'; r.style.left = e.clientX + 'px'; r.style.top = e.clientY + 'px';
+      document.body.appendChild(r);
+      r.animate([{ transform: 'translate(-50%,-50%) scale(.05)', opacity: 1 }, { transform: 'translate(-50%,-50%) scale(1)', opacity: 0 }], { duration: 1100, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' }).onfinish = () => r.remove();
+    }, { passive: true });
+    film.clicks = clicks;
 
     film.intro = 1;
     film.draw = (now) => {
@@ -284,6 +313,7 @@ void main(){
       gl.uniform2f(U.uMouse, mouse.x, mouse.y + (A0.shape === 'text' ? 0 : 0)); gl.uniform1f(U.uPush, push * (0.5 + 0.5 * onName));
       gl.uniform3fv(U.uFromC1, A0.c1); gl.uniform3fv(U.uFromC2, A0.c2); gl.uniform3fv(U.uToC1, B0.c1); gl.uniform3fv(U.uToC2, B0.c2);
       gl.uniform4fv(U.uFromAx, A0.ax); gl.uniform4fv(U.uToAx, B0.ax);
+      gl.uniform4fv(U.uClicks, clicks);
       gl.uniform1f(U.uShapeA, state.vw < 900 ? 0.32 : 0.8);
       gl.drawArrays(gl.POINTS, 0, N);
       DS.stage = s;

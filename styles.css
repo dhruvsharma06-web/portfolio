@@ -345,3 +345,20 @@ main, .footer { position: relative; z-index: 2; }
   .statement-pin { position: static; height: auto; padding: var(--gap) var(--m) 0; }
   .card { position: relative; height: auto; }
 }
+
+/* ---------- Prism ripple ring */
+.prism { position: fixed; z-index: 3; width: 520px; height: 520px; border-radius: 50%; pointer-events: none;
+  background: conic-gradient(from 0deg, #ff5f8f, #ffb057, #ffe66b, #5effa8, #5ee8ff, #7d8bff, #d07bff, #ff5f8f);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); filter: blur(.4px); }
+
+/* ---------- Footer links, 404 */
+.foot-row { flex-wrap: wrap; align-items: center; }
+.foot-links { display: flex; gap: 22px; }
+.foot-links a, .foot-row > a { transition: color 200ms ease; }
+@media (hover: hover) and (pointer: fine) { .foot-links a:hover, .foot-row > a:hover { color: #fff; } }
+.page-404 .hero-title { font-size: clamp(8rem, 34vw, 30rem); }
+.lost .hero-inner { justify-content: center; }
+.lost-copy { display: grid; gap: 24px; }
+.page-404 .scroll-cue, .page-404 .hud { display: none !important; }
+.page-404 .hero-title .line:last-child { text-align: left; }
