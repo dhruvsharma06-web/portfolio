@@ -33,15 +33,16 @@
   </defs>
 </svg>
 <canvas class="bg" id="bg" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
 <div class="progress" aria-hidden="true"><i id="progress"></i></div>
 <div class="cursor" aria-hidden="true"><span class="cursor-label"></span></div>
 <div class="intro" id="intro" aria-hidden="true">
   <div class="intro-line"></div>
-  <div class="intro-spectrum"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
   <p class="intro-count"><span id="introCount">00</span></p>
-  <div class="bar bar-top"></div><div class="bar bar-bottom"></div>
+  <p class="intro-name">Dhruv Sharma — Portfolio 2026</p>
 </div>
-<div class="curtain" id="curtain" aria-hidden="true"><div class="curtain-panel"></div><div class="wipe-strip"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div class="curtain" id="curtain" aria-hidden="true"><div class="curtain-panel"></div><div class="curtain-edge"></div></div>
+<div class="hud" id="hud" aria-hidden="true"><span class="hud-no" id="hudNo">01 / 06</span><span class="hud-name" id="hudName">Opening</span><span class="hud-bar"><i id="hudBar"></i></span></div>
 <header class="nav" id="nav">
   <a class="wordmark" href="index.html" data-transition aria-label="Dhruv Sharma, home">Dhruv Sharma</a>
   <nav aria-label="Primary"><ul><li><a href="index.html#work" data-transition>Work</a></li><li><a href="index.html#experience" data-transition>Experience</a></li><li><a href="index.html#toolkit" data-transition>Toolkit</a></li><li><a href="about.html" data-transition aria-current="page">About</a></li></ul></nav>
@@ -50,18 +51,18 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <main id="main">
-  <section class="hero about-hero" id="top" aria-labelledby="about-title">
+  <section class="hero about-hero" id="top" aria-labelledby="about-title" data-stage="text" data-stage-text=".hero-title" data-chapter="About">
     <div class="hero-inner">
       <h1 id="about-title" class="hero-title" aria-label="About"><span class="line" aria-hidden="true"><span class="ch" style="--i:0">A</span><span class="ch" style="--i:1">b</span><span class="ch" style="--i:2">o</span><span class="ch" style="--i:3">u</span><span class="ch" style="--i:4">t</span></span></h1>
       <p class="about-lead" data-rise style="--i:1">I'm Dhruv, a software and IoT developer in Mumbai. I focus on practical solutions that connect software, data and embedded systems, and I'm happiest when an app and a circuit board have to agree with each other.</p>
     </div>
   </section>
 
-  <section class="about-block scene" aria-labelledby="edu-title">
-    <div class="wipe about-grid">
-      <h2 id="edu-title" class="h2">Education</h2>
+  <section class="about-block" aria-labelledby="edu-title" data-stage="sphere" data-chapter="Education">
+    <div class="about-grid">
+      <h2 id="edu-title" class="h2" data-kinetic>Education</h2>
       <div class="about-body">
-        <p class="about-big">B.Tech in Information Technology</p>
+        <p class="about-big" data-rise>B.Tech in Information Technology</p>
         <p class="about-mid">K. J. Somaiya Institute of Technology, Mumbai</p>
         <dl class="facts">
           <div><dt>CGPA</dt><dd><span class="count" data-to="9.2">9.2</span></dd></div>
@@ -72,29 +73,29 @@
     </div>
   </section>
 
-  <section class="about-block scene" aria-labelledby="now-title">
-    <div class="wipe about-grid">
-      <h2 id="now-title" class="h2">Right now</h2>
+  <section class="about-block" aria-labelledby="now-title" data-stage="helix" data-chapter="Right now">
+    <div class="about-grid">
+      <h2 id="now-title" class="h2" data-kinetic>Right now</h2>
       <div class="about-body">
-        <p class="about-big">Research on a haemophilia monitoring device</p>
+        <p class="about-big" data-rise>Research on a haemophilia monitoring device</p>
         <p class="about-p">Since July 2026 I've been a research intern at K. J. Somaiya College of Physiotherapy, working with physiotherapists and engineers on IoT hardware for patient monitoring and support. It connects directly to HemoPhysio, my rehab app.</p>
       </div>
     </div>
   </section>
 
-  <section class="about-block scene" aria-labelledby="how-title">
-    <div class="wipe about-grid">
-      <h2 id="how-title" class="h2">How I work</h2>
-      <ul class="traits">
+  <section class="about-block" aria-labelledby="how-title" data-stage="lattice" data-chapter="How I work">
+    <div class="about-grid">
+      <h2 id="how-title" class="h2" data-kinetic>How I work</h2>
+      <ul class="traits" data-rise>
         <li>Problem solving</li><li>Team collaboration</li><li>Leadership</li>
         <li>Clear communication</li><li>Quick learning</li><li>Time management</li>
       </ul>
     </div>
   </section>
 
-  <section class="contact scene" aria-labelledby="ct-title">
-    <div class="wipe">
-      <h2 id="ct-title" class="contact-title"><span class="spectral">See the</span><br>work.</h2>
+  <section class="contact" aria-labelledby="ct-title" data-stage="galaxy" data-chapter="Next">
+    <div class="contact-wrap">
+      <h2 id="ct-title" class="contact-title" data-kinetic>See the<br>work.</h2>
       <div class="contact-actions">
         <a class="btn btn-light" href="index.html#work" data-transition data-magnetic>View projects</a>
         <a class="btn btn-dark" href="mailto:dhruv.sharma06@somaiya.edu" data-magnetic>Email me</a>

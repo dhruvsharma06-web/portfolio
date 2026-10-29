@@ -3,18 +3,16 @@
   const DS = window.DS; if (!DS) return;
   const { $, $$, clamp, motion, fine, state } = DS;
 
-  /* ---------- Hero: push back on scroll, chromatic split on fast scroll */
-  const heroInner = $('#heroInner'), heroTitle = $('.hero-title');
-  if (motion) {
-    let ab = 0;
+  /* ---------- Hero: the copy recedes as the name dissolves */
+  const heroRow = $('.hero .hero-row'), heroHint = $('.hero-hint');
+  if (motion && heroRow) {
     DS.onFrame(() => {
-      const p = clamp(state.y / state.vh);
-      if (p < 1) {
-        heroInner.style.transform = `translate3d(0,${(p * state.vh * 0.12).toFixed(1)}px,0) scale(${(1 - p * 0.08).toFixed(4)})`;
-        heroInner.style.opacity = Math.max(0, 1 - p * 1.8).toFixed(3);
+      const p = clamp(state.y / (state.vh * 0.7));
+      if (p <= 1) {
+        heroRow.style.transform = `translate3d(0,${(-p * 60).toFixed(1)}px,0)`;
+        heroRow.style.opacity = (1 - p).toFixed(3);
+        if (heroHint) heroHint.style.opacity = (1 - p * 2).toFixed(3);
       }
-      ab += (clamp(Math.abs(state.vel) / 3, 0, 14) - ab) * 0.2;
-      heroTitle.style.textShadow = ab > 0.3 ? `${(-ab).toFixed(1)}px 0 rgba(255,40,90,.85), ${ab.toFixed(1)}px 0 rgba(40,230,255,.85)` : 'none';
     });
   }
 
@@ -33,7 +31,6 @@
       for (let i = 0; i < words.length; i++) {
         const k = clamp(lit - i);
         words[i].style.opacity = (0.14 + 0.86 * k).toFixed(3);
-        words[i].classList.toggle('now', k > 0 && k < 1);
       }
     });
   }
@@ -83,33 +80,36 @@
     });
   }
 
-  /* ---------- Toolkit: marquee rows, drift + scroll velocity, pause on hover */
-  const rows = $$('.row').map((row) => {
-    const strip = $('.strip', row), ul = $('ul', strip);
-    const inner = document.createElement('div'); inner.className = 'strip-inner';
-    strip.appendChild(inner); inner.appendChild(ul);
-    if (motion) for (let i = 0; i < 3; i++) { const c = ul.cloneNode(true); c.setAttribute('aria-hidden', 'true'); inner.appendChild(c); }
-    const o = { inner, ul, dir: Number(row.dataset.dir) || 1, x: 0, w: 0, speed: 1, target: 1 };
-    row.addEventListener('pointerenter', () => { o.target = 0; });
-    row.addEventListener('pointerleave', () => { o.target = 1; });
-    return o;
+  /* ---------- Stat counters */
+  $$('[data-count]').forEach((el) => {
+    if (!motion) return;
+    const to = parseInt(el.dataset.count, 10); el.textContent = '0';
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return; io.disconnect();
+      const t0 = performance.now();
+      const step = (t) => { const p = clamp((t - t0) / 1400), k = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(to * k); if (p < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    }, { threshold: 0.8 });
+    io.observe(el);
   });
-  const measure = () => rows.forEach((r) => { r.w = r.ul.getBoundingClientRect().width; });
-  measure(); addEventListener('resize', measure);
-  if (document.fonts) document.fonts.ready.then(measure);
-  if (motion) {
-    let last = performance.now();
-    DS.onFrame((t) => {
-      const dt = Math.min(50, t - last); last = t;
-      for (const m of rows) {
-        if (!m.w) continue;
-        m.speed += (m.target - m.speed) * 0.08;
-        m.x += m.dir * m.speed * (0.04 * dt + Math.abs(state.vel) * 0.5);
-        const xx = ((m.x % m.w) + m.w) % m.w;
-        m.inner.style.transform = `translate3d(${(-xx).toFixed(1)}px,0,0)`;
-      }
+
+  /* ---------- Tech stack: show where each skill was used */
+  const used = $('#used'); let pinned = null;
+  const show = (b) => {
+    if (!b) { used.innerHTML = '&nbsp;'; return; }
+    const u = b.dataset.used;
+    used.innerHTML = u ? `<b>${b.textContent}</b> — used in ${u}.` : `<b>${b.textContent}</b> — part of my everyday toolkit.`;
+  };
+  $$('.skill').forEach((b) => {
+    b.addEventListener('pointerenter', () => { if (!pinned) show(b); });
+    b.addEventListener('pointerleave', () => { if (!pinned) show(null); });
+    b.addEventListener('focus', () => show(b));
+    b.addEventListener('click', () => {
+      if (pinned === b) { b.classList.remove('on'); pinned = null; show(null); return; }
+      if (pinned) pinned.classList.remove('on');
+      pinned = b; b.classList.add('on'); show(b);
     });
-  }
+  });
 
   /* ---------- Copy email */
   const copy = $('#copyMail');
@@ -120,7 +120,7 @@
   });
 
   /* ---------- Showreel player: expands out of whatever was clicked */
-  const player = $('#player'), pv = $('#playerVideo'), thumbV = $('#thumbVideo');
+  const player = $('#player'), pv = $('#playerVideo');
   const pToggle = $('#pToggle'), pClose = $('#pClose'), pTrack = $('#pTrack'), pFill = pTrack && pTrack.parentElement;
   const pCur = $('#pCur'), pDur = $('#pDur');
   let opener = null, originRect = null;
@@ -134,18 +134,16 @@
     player.hidden = false;
     document.body.style.overflow = 'hidden';
     pv.preload = 'auto';
-    const startAt = at != null ? at : (thumbV && !isNaN(thumbV.currentTime) ? thumbV.currentTime : 0);
+    const startAt = at != null ? at : 0;
     const go = () => { try { pv.currentTime = startAt; } catch (_) {} pv.play().catch(() => player.classList.add('paused')); };
     if (pv.readyState >= 1) go(); else pv.addEventListener('loadedmetadata', go, { once: true });
     player.classList.remove('paused');
-    thumbV && thumbV.pause();
     if (motion) player.animate([{ clipPath: insetFrom(originRect) }, { clipPath: 'inset(0px 0px 0px 0px round 0px)' }], { duration: 700, easing: 'cubic-bezier(0.32, 0.72, 0, 1)' });
     pToggle.focus();
   }
   function close() {
     const done = () => {
       player.hidden = true; pv.pause(); document.body.style.overflow = '';
-      thumbV && thumbV.play().catch(() => {});
       opener && opener.focus({ preventScroll: true });
     };
     if (motion && originRect) {
@@ -195,11 +193,4 @@
       }
     });
   }
-  // start the hero preview on the title card rather than the black opening frames
-  if (thumbV) {
-    const jump = () => { if (thumbV.currentTime < 2.5) { try { thumbV.currentTime = 4.2; } catch (_) {} } };
-    if (thumbV.readyState >= 1) jump(); else thumbV.addEventListener('loadedmetadata', jump, { once: true });
-  }
-  // the hero preview doesn't autoplay with reduced motion
-  if (!motion && thumbV) { thumbV.removeAttribute('autoplay'); thumbV.pause(); }
 })();

@@ -4,7 +4,7 @@ Static site (HTML, CSS, JavaScript). No build step, no dependencies.
 
 - `index.html` — home: hero with showreel, projects, experience, toolkit, contact
 - `about.html` — education, current research, how I work
-- `core.js` — shared motion: WebGL light-strip background, cursor, scene wipes, intro, page transitions
+- `core.js` — shared motion: scroll-driven WebGL particle film (interactive name), cursor, kinetic titles, intro, page transitions
 - `main.js` — home page interactions and the showreel player
 - `media/reel.mp4` — 32-second showreel (rendered from code)
 
