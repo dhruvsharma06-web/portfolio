@@ -659,3 +659,4 @@ html.bar-stuck .progress { top: 0; }
 @media (min-width: 900px) and (min-height: 680px) { .hero { height: 100svh; min-height: 0; overflow: hidden; } .hero-inner { min-height: 0; } }
 
 html, html.motion { scroll-snap-type: none; }
+.hand { fill: #2a2a33; stroke: #6b6b80; stroke-width: 2; } .pinch { fill: none; stroke: #6ee7ff; stroke-width: 3; } .planet { stroke: none; }
