@@ -70,6 +70,35 @@
     });
   }
 
+  /* ---------- Work by domain: glass cards */
+  const glasses = $$('[data-glass]');
+  const gIO = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('on'); gIO.unobserve(e.target); } }), { rootMargin: '0px 0px -12% 0px' });
+  glasses.forEach((g) => gIO.observe(g));
+  if (fine && motion) {
+    glasses.forEach((g) => {
+      g.addEventListener('pointermove', (e) => {
+        const r = g.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+        g.style.setProperty('--gx', `${(x * 100).toFixed(1)}%`); g.style.setProperty('--gy', `${(y * 100).toFixed(1)}%`);
+        g.style.setProperty('--ry', `${((x - .5) * 6).toFixed(2)}deg`); g.style.setProperty('--rx', `${((.5 - y) * 5).toFixed(2)}deg`);
+      });
+      g.addEventListener('pointerleave', () => { g.style.setProperty('--ry', '0deg'); g.style.setProperty('--rx', '0deg'); });
+    });
+  }
+  // domain nav: highlight the section in view, keep the active chip visible
+  const dLinks = $$('.domain-nav a'), dSecs = $$('.domain');
+  if (dLinks.length) {
+    let cur = -1;
+    DS.onFrame(() => {
+      let c = -1;
+      dSecs.forEach((s, i) => { if (s.getBoundingClientRect().top < state.vh * 0.45) c = i; });
+      if (c !== cur) {
+        cur = c; dLinks.forEach((a, i) => a.classList.toggle('on', i === c));
+        if (c >= 0) { const a = dLinks[c], ul = a.parentElement.parentElement; ul.scrollTo({ left: a.offsetLeft - ul.clientWidth / 2 + a.clientWidth / 2, behavior: motion ? 'smooth' : 'auto' }); }
+      }
+    });
+    if (!motion) { /* nothing else */ }
+  }
+
   /* ---------- Experience: the rail fills with light as you scroll */
   const tl = $('#timeline'), tlFill = $('#tlFill');
   if (tl) {
