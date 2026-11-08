@@ -73,7 +73,7 @@
   /* ---------- Work by domain: glass cards */
   const glasses = $$('[data-glass]');
   const gIO = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('on'); gIO.unobserve(e.target); } }), { rootMargin: '0px 0px -12% 0px' });
-  glasses.forEach((g) => gIO.observe(g));
+  if (!motion) glasses.forEach((g) => gIO.observe(g));
   // ambient animations inside a card run only while it is on screen
   const visIO = new IntersectionObserver((es) => es.forEach((e) => e.target.classList.toggle('vis', e.isIntersecting)), { rootMargin: '10% 0px' });
   glasses.forEach((g) => visIO.observe(g));
@@ -85,26 +85,46 @@
     }));
   }
 
-  /* ---------- Scene transitions: every section eases in as you scroll to it, and settles back as it leaves */
+  /* ---------- Scenes: snap to each section, sweep a veil across the screen on every change,
+     and replay the new scene's blur-rise entrance each time it becomes active. */
   const scenes = $$('[data-scene]');
+  const veil = $('#veil');
+  const IN_SEL = ':scope > *:not(.wipe-strip), .domain-head > *, .glass-grid > .glass, .timeline > .role, .stack-grid > .cat, .tk-head > *, .hero-row > *, .hero-copy > *, .statement-pin > *, .about-grid > *, .about-body > *, .contact-wrap > *';
+  scenes.forEach((sc) => {
+    let d = 0;
+    sc.querySelectorAll(IN_SEL).forEach((el) => {
+      if (el.matches('.glass-grid, .hero-row, .hero-copy, .about-grid, .about-body, .domain-head, .stack-grid, .timeline, .tk-head, .contact-wrap, .statement-pin, .hero-inner')) return;
+      el.removeAttribute('data-rise');
+      el.setAttribute('data-in', '');
+      el.style.setProperty('--d', d++);
+    });
+  });
   if (motion && scenes.length) {
-    const ease = (t) => 1 - Math.pow(1 - t, 3);
+    let active = null;
     DS.onFrame(() => {
-      const vh = state.vh, maxY = document.documentElement.scrollHeight - vh;
-      const atEnd = clamp(1 - (maxY - state.y) / (vh * 0.3));
-      for (const el of scenes) {
-        const r = el.getBoundingClientRect();
-        if (r.bottom < -vh * 0.2 || r.top > vh * 1.2) continue;
-        const enter = Math.max(ease(clamp((vh - r.top) / (vh * 0.6))), r.bottom > vh * 0.5 ? atEnd : 0);
-        const leave = clamp((vh * 0.25 - r.bottom) / (vh * 0.5));
-        const y = (1 - enter) * 90 - leave * 40;
-        const sc = 0.92 + 0.08 * enter - leave * 0.04;
-        el.style.transform = `translate3d(0,${y.toFixed(1)}px,0) scale(${sc.toFixed(4)})`;
-        el.style.opacity = (0.15 + 0.85 * enter - leave * 0.6).toFixed(3);
-        el.style.filter = enter < 0.98 ? `blur(${((1 - enter) * 8).toFixed(1)}px)` : '';
+      const mid = state.vh * 0.5;
+      let cur = null;
+      for (const sc of scenes) { const r = sc.getBoundingClientRect(); if (r.top <= mid && r.bottom > mid) cur = sc; }
+      if (!cur) {
+        const max = document.documentElement.scrollHeight - state.vh;
+        if (state.y >= max - 4) cur = scenes[scenes.length - 1];
+      }
+      if (cur && cur !== active) {
+        const first = !active;
+        if (active) { active.classList.remove('is-active'); active.querySelectorAll('.glass').forEach((g) => g.classList.remove('on')); }
+        active = cur; cur.classList.add('is-active');
+        cur.querySelectorAll('.glass').forEach((g) => g.classList.add('on'));
+        if (!first && veil) { veil.classList.remove('is-sweeping'); void veil.offsetWidth; veil.classList.add('is-sweeping'); }
       }
     });
-  }
+  } else scenes.forEach((s) => s.classList.add('is-active'));
+
+  // sticky domain bar: hide the site nav while it's pinned so the two never stack
+  const dBar = $('.domain-nav'), workSec = $('#work');
+  if (dBar && workSec) DS.onFrame(() => {
+    const stuck = dBar.getBoundingClientRect().top <= 1 && workSec.getBoundingClientRect().bottom > 120;
+    document.documentElement.classList.toggle('bar-stuck', stuck);
+  });
 
   // domain nav: highlight the section in view, keep the active chip visible
   const dLinks = $$('.domain-nav a'), dSecs = $$('.domain');

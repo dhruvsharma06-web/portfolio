@@ -185,7 +185,7 @@ void main(){
         arr[i * 3 + 2] = 0;
       }
       dust(arr, used);
-      return { arr, size: Math.max(2, step * 1.15) };
+      return { arr, size: Math.max(1.6, step * 0.8) };
     }
     function terrain() {
       const arr = new Float32Array(N * 3);

@@ -585,3 +585,70 @@ main, .footer { position: relative; z-index: 2; }
 .hero-title { font-size: clamp(5rem, min(19vw, 27svh), 24rem); }
 @media (min-width: 900px) and (max-height: 820px) { .hero-title { font-size: min(18vw, 25svh); } .portrait { width: min(380px, 36svh); } }
 @media (max-width: 899px) { .hero-title { font-size: 26vw; } .portrait { width: min(300px, 72vw); margin: 16px 0 24px; } }
+
+/* =========================================================
+   v4: Pluto-style scenes — snap, veil sweep, blur-rise copy
+   ========================================================= */
+@media (min-width: 900px) { html.motion { scroll-snap-type: y proximity; } }
+[data-scene] { scroll-snap-align: start; transform: none !important; opacity: 1 !important; filter: none !important; will-change: auto; }
+.hero, .statement, .experience, .toolkit, .contact, .about-block { min-height: 100svh; }
+.statement { height: auto; display: grid; }
+.statement-pin { position: static; height: auto; min-height: 100svh; }
+.experience, .toolkit, .about-block { display: flex; flex-direction: column; justify-content: center; padding-top: 96px; padding-bottom: 64px; margin-top: 0; }
+.contact { margin-top: 0; }
+.domain { min-height: 100svh; margin-bottom: 0; padding-top: 104px; padding-bottom: 72px; display: flex; flex-direction: column; justify-content: center; scroll-margin-top: 0; }
+.work { margin-top: 0; }
+.work-head { min-height: 60svh; display: flex; align-items: center; margin-bottom: 0; padding-top: 96px; }
+
+.veil { position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0; background: #000; }
+.veil.is-sweeping { animation: veil 1000ms var(--ease-in-out) both; }
+@keyframes veil { 0% { opacity: 0; } 35% { opacity: .92; } 100% { opacity: 0; } }
+
+.motion [data-scene] [data-in] { opacity: 0; transform: translateY(46px); filter: blur(10px);
+  transition: opacity 900ms var(--ease-out), transform 1100ms var(--ease-out), filter 900ms var(--ease-out); transition-delay: calc(var(--d, 0) * 110ms + 250ms); }
+.motion [data-scene].is-active [data-in] { opacity: 1; transform: none; filter: none; }
+/* glass cards take their entrance from the scene (and replay it) */
+.motion .glass[data-in] { --ty: 0px; }
+.motion [data-scene]:not(.is-active) .glass .g-media { clip-path: inset(0 0 100% 0 round 14px); transition: none; }
+.motion [data-scene]:not(.is-active) .glass .g-body > * { opacity: 0; transform: translateY(18px); transition: none; }
+
+/* domain bar: a solid sticky band for navigation */
+.domain-nav { position: sticky; top: 0; z-index: 45; margin: 0; padding: 12px var(--m); justify-content: flex-start;
+  background: rgba(0,0,0,.78); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); box-shadow: 0 1px 0 rgba(255,255,255,.08); }
+.domain-nav ul { background: rgba(255,255,255,.05); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
+html.bar-stuck .nav { transform: translateY(-110%); }
+html.bar-stuck .progress { top: 0; }
+.domain { scroll-margin-top: 62px; }
+@media (prefers-reduced-motion: reduce) { .veil { display: none; } }
+
+/* hero name: crisp solid type; the particle film sits behind it as sparkle */
+.film .hero-title, .film .hero-title .ch { color: #fff; }
+.hero-title { text-shadow: 0 0 60px rgba(167,139,250,.25); }
+.hero-title .line { padding-bottom: .08em; }
+
+/* =========================================================
+   Each domain fits exactly one screen (desktop), so every scroll lands on a whole scene
+   ========================================================= */
+@media (min-width: 900px) and (min-height: 680px) {
+  .domain { height: 100svh; min-height: 0; padding: 86px var(--m) 28px; justify-content: flex-start; }
+  .domain-head { margin-bottom: clamp(14px, 2vh, 24px); flex: none; align-items: center; }
+  .domain-title { font-size: clamp(2.25rem, 4.2vw, 4.25rem); }
+  .domain-title::before { margin-bottom: 10px; }
+  .domain-sub { font-size: clamp(1.0625rem, 1.4vw, 1.375rem); max-width: 36ch; }
+  .glass-grid { flex: 1; min-height: 0; grid-auto-rows: minmax(0, 1fr); }
+  .glass { min-height: 0 !important; grid-template-rows: minmax(0, 1fr) auto; }
+  .glass-grid.one .glass { grid-template-rows: none; }
+  .g-media { aspect-ratio: auto !important; min-height: 0 !important; display: grid; place-items: center; }
+  .g-media.art { padding: 10px 14px; }
+  .g-media.art svg { width: auto; height: 100%; max-width: 100%; }
+  .glass-grid:not(.one) .g-body { padding: 14px 20px 18px; gap: 8px; }
+  .glass-grid:not(.one) .g-title { font-size: clamp(1.5rem, 2.2vw, 2.25rem); }
+  .glass-grid:not(.one) .g-line { font-size: .9375rem; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .glass-grid:not(.one) .g-stack { display: none; }
+  .glass-grid:not(.one) .g-facts li { padding: 4px 10px; font-size: .8125rem; }
+  .glass-grid:not(.one) .g-link { min-height: 36px; padding: 0 14px; font-size: .875rem; }
+  .glass-grid:not(.one) .g-status { padding: 4px 10px; }
+  .glass-grid.one .g-body { padding: clamp(20px, 2.6vw, 40px); gap: 12px; }
+  html.motion { scroll-snap-type: y mandatory; }
+  .work-head, .domain, .hero, .statement, .experience, .toolkit, .contact { scroll-snap-stop: normal; }
+}
