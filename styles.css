@@ -622,8 +622,7 @@ html.bar-stuck .progress { top: 0; }
 @media (prefers-reduced-motion: reduce) { .veil { display: none; } }
 
 /* hero name: crisp solid type; the particle film sits behind it as sparkle */
-.film .hero-title, .film .hero-title .ch { color: #fff; }
-.hero-title { text-shadow: 0 0 60px rgba(167,139,250,.25); }
+.film .hero-title, .film .hero-title .ch { color: transparent; text-shadow: none; }
 .hero-title .line { padding-bottom: .08em; }
 
 /* =========================================================
@@ -652,3 +651,8 @@ html.bar-stuck .progress { top: 0; }
   html.motion { scroll-snap-type: y mandatory; }
   .work-head, .domain, .hero, .statement, .experience, .toolkit, .contact { scroll-snap-stop: normal; }
 }
+
+/* calm cards: no sweeping light, no flowing dots, no glow sheen */
+.g-scan, .flow { display: none !important; }
+.glass::before { display: none; }
+.motion .glass.vis .gauge { filter: none; }
