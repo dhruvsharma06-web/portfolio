@@ -268,7 +268,7 @@ void main(){
       let s = 0;
       for (let i = 1; i < stages.length; i++) {
         const top = stages[i].el.getBoundingClientRect().top + y;
-        const start = top - state.vh * 1.05, end = top - state.vh * 0.25;
+        const start = top - state.vh * (i === 1 ? 0.75 : 1.05), end = top - state.vh * 0.25;
         if (y >= end) s = i; else if (y > start) { s = i - 1 + (y - start) / (end - start); break; } else break;
       }
       return s;

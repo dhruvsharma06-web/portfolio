@@ -589,8 +589,8 @@ main, .footer { position: relative; z-index: 2; }
 /* =========================================================
    v4: Pluto-style scenes — snap, veil sweep, blur-rise copy
    ========================================================= */
-@media (min-width: 900px) { html.motion { scroll-snap-type: y proximity; } }
-[data-scene] { scroll-snap-align: start; transform: none !important; opacity: 1 !important; filter: none !important; will-change: auto; }
+
+[data-scene] { transform: none !important; opacity: 1 !important; filter: none !important; will-change: auto; }
 .hero, .statement, .experience, .toolkit, .contact, .about-block { min-height: 100svh; }
 .statement { height: auto; display: grid; }
 .statement-pin { position: static; height: auto; min-height: 100svh; }
@@ -648,11 +648,14 @@ html.bar-stuck .progress { top: 0; }
   .glass-grid:not(.one) .g-link { min-height: 36px; padding: 0 14px; font-size: .875rem; }
   .glass-grid:not(.one) .g-status { padding: 4px 10px; }
   .glass-grid.one .g-body { padding: clamp(20px, 2.6vw, 40px); gap: 12px; }
-  html.motion { scroll-snap-type: y mandatory; }
-  .work-head, .domain, .hero, .statement, .experience, .toolkit, .contact { scroll-snap-stop: normal; }
 }
 
 /* calm cards: no sweeping light, no flowing dots, no glow sheen */
 .g-scan, .flow { display: none !important; }
 .glass::before { display: none; }
 .motion .glass.vis .gauge { filter: none; }
+
+/* landing is exactly one screen so snapping back up always lands at the very top */
+@media (min-width: 900px) and (min-height: 680px) { .hero { height: 100svh; min-height: 0; overflow: hidden; } .hero-inner { min-height: 0; } }
+
+html, html.motion { scroll-snap-type: none; }
