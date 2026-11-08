@@ -85,39 +85,23 @@
     }));
   }
 
-  /* ---------- Full-window scene cut when a new section arrives (scrolling down) */
-  const cut = $('#cut'), cutT = $('#cutTitle'), cutK = $('#cutKicker'), cutP = cut && $('.cut-panel', cut);
-  if (motion && cut) {
-    const secs = $$('[data-cut]'), fired = new Set(); let lastY = scrollY, busy = false;
-    const EIO = 'cubic-bezier(0.77, 0, 0.175, 1)', EO = 'cubic-bezier(0.23, 1, 0.32, 1)';
-    const play = (s) => {
-      busy = true;
-      const tint = getComputedStyle(s).getPropertyValue('--tint').trim();
-      cut.style.setProperty('--tint', tint || '#a78bfa');
-      cutK.textContent = s.dataset.cutKicker || 'Next';
-      cutT.innerHTML = [...s.dataset.cut].map((c, i) => `<span class="kl" style="--n:${i}">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
-      cut.classList.add('run');
-      cutP.animate([
-        { clipPath: 'inset(100% 0 0 0)', offset: 0, easing: EIO },
-        { clipPath: 'inset(0% 0 0 0)', offset: .3 },
-        { clipPath: 'inset(0 0 0% 0)', offset: .66, easing: EIO },
-        { clipPath: 'inset(0 0 100% 0)', offset: 1 }], { duration: 1500, fill: 'both' });
-      cutK.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none', offset: .35 }, { opacity: 1, transform: 'none', offset: .66 }, { opacity: 0, transform: 'translateY(-16px)' }], { duration: 1500, fill: 'both', easing: EO });
-      cutT.querySelectorAll('.kl').forEach((k, i) => k.animate([
-        { opacity: 0, transform: 'translateY(60%) rotateX(-70deg)', filter: 'blur(8px)' },
-        { opacity: 1, transform: 'none', filter: 'blur(0)', offset: .4 },
-        { opacity: 1, transform: 'none', filter: 'blur(0)', offset: .68 },
-        { opacity: 0, transform: 'translateY(-40%)', filter: 'blur(6px)' }], { duration: 1500, delay: i * 18, fill: 'both', easing: EO }));
-      setTimeout(() => { cut.classList.remove('run'); busy = false; }, 1500 + s.dataset.cut.length * 18 + 40);
-    };
+  /* ---------- Scene transitions: every section eases in as you scroll to it, and settles back as it leaves */
+  const scenes = $$('[data-scene]');
+  if (motion && scenes.length) {
+    const ease = (t) => 1 - Math.pow(1 - t, 3);
     DS.onFrame(() => {
-      const y = scrollY, down = y > lastY + 0.5; lastY = y;
-      for (const s of secs) {
-        const top = s.getBoundingClientRect().top;
-        if (top > state.vh * 0.95) { fired.delete(s); continue; }
-        if (fired.has(s)) continue;
-        if (down && !busy && top < state.vh * 0.6 && top > state.vh * 0.05) { fired.add(s); play(s); }
-        else if (top <= state.vh * 0.05) fired.add(s);
+      const vh = state.vh, maxY = document.documentElement.scrollHeight - vh;
+      const atEnd = clamp(1 - (maxY - state.y) / (vh * 0.3));
+      for (const el of scenes) {
+        const r = el.getBoundingClientRect();
+        if (r.bottom < -vh * 0.2 || r.top > vh * 1.2) continue;
+        const enter = Math.max(ease(clamp((vh - r.top) / (vh * 0.6))), r.bottom > vh * 0.5 ? atEnd : 0);
+        const leave = clamp((vh * 0.25 - r.bottom) / (vh * 0.5));
+        const y = (1 - enter) * 90 - leave * 40;
+        const sc = 0.92 + 0.08 * enter - leave * 0.04;
+        el.style.transform = `translate3d(0,${y.toFixed(1)}px,0) scale(${sc.toFixed(4)})`;
+        el.style.opacity = (0.15 + 0.85 * enter - leave * 0.6).toFixed(3);
+        el.style.filter = enter < 0.98 ? `blur(${((1 - enter) * 8).toFixed(1)}px)` : '';
       }
     });
   }
@@ -165,7 +149,7 @@
   const show = (b) => {
     if (!b) { used.innerHTML = '&nbsp;'; return; }
     const u = b.dataset.used;
-    used.innerHTML = u ? `<b>${b.textContent}</b> — used in ${u}.` : `<b>${b.textContent}</b> — part of my everyday toolkit.`;
+    used.innerHTML = u ? `<b>${b.textContent}</b> shows up in ${u}.` : `<b>${b.textContent}</b> is something I use all the time.`;
   };
   $$('.skill').forEach((b) => {
     b.addEventListener('pointerenter', () => { if (!pinned) show(b); });

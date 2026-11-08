@@ -575,3 +575,13 @@ main, .footer { position: relative; z-index: 2; }
 
 .portrait figcaption { display: none; }
 .hero-where { font-weight: 600; font-size: .9375rem; color: var(--ink-2); }
+
+/* ---------- v3 adjustments */
+[data-scene] { transform-origin: 50% 0%; will-change: transform, opacity; }
+.domain-nav { position: relative; top: auto; justify-content: flex-start; margin-top: -24px; }
+.portrait { width: min(420px, 37svh); margin: 0 1vw 1vh 0; }
+.av-portrait { box-shadow: 0 0 0 1px rgba(255,255,255,.18), 0 30px 80px -20px rgba(0,0,0,.8), 0 0 60px -10px rgba(167,139,250,.55); }
+.av-portrait::after { padding: 4px; }
+.hero-title { font-size: clamp(5rem, min(19vw, 27svh), 24rem); }
+@media (min-width: 900px) and (max-height: 820px) { .hero-title { font-size: min(18vw, 25svh); } .portrait { width: min(380px, 36svh); } }
+@media (max-width: 899px) { .hero-title { font-size: 26vw; } .portrait { width: min(300px, 72vw); margin: 16px 0 24px; } }

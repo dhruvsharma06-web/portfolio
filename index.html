@@ -72,7 +72,7 @@
       <div class="hero-row">
         <div class="hero-copy">
           <p class="hero-role" data-rise style="--i:0">Software &amp; IoT Developer</p>
-          <p class="hero-lede" data-rise style="--i:1">I build apps, backends and ESP32 firmware, and wire up the sensors in between.</p>
+          <p class="hero-lede" data-rise style="--i:1">I make apps, write the servers behind them, and build the hardware that feeds them data.</p>
           <p class="hero-where" data-rise style="--i:1">Mumbai, India · <span class="avail">open to internships</span></p>
           <div class="hero-actions" data-rise style="--i:2">
             <a class="btn btn-light" href="#work" data-magnetic>View work</a>
@@ -83,7 +83,7 @@
         <figure class="portrait" data-rise style="--i:1">
           <span class="halo" aria-hidden="true"></span>
           <span class="avatar av-portrait"><span class="mono" aria-hidden="true">DS</span><img src="media/dhruv.jpg" alt="Dhruv Sharma" onerror="this.remove()"></span>
-          <ul class="orbit-tags" aria-hidden="true"><li style="--a:0deg">ESP32</li><li style="--a:72deg">Flutter</li><li style="--a:144deg">AI / ML</li><li style="--a:216deg">FastAPI</li><li style="--a:288deg">IoT</li></ul>
+          
           <figcaption>Mumbai, India · <span class="avail">open to internships</span></figcaption>
         </figure>
       </div>
@@ -95,7 +95,7 @@
   <section class="statement" aria-labelledby="st-title" data-stage="terrain" data-chapter="What I do">
     <div class="statement-pin">
       <h2 id="st-title" class="kicker-h">What I do</h2>
-      <p class="statement-text" id="statement">I build across the stack and into the hardware: Flutter apps that talk to ESP32 boards, Java and FastAPI backends on real databases, and AI models that spot crop disease and track orbits, and dashboards that turn raw data into decisions.</p>
+      <p class="statement-text" id="statement">Most of my projects start with a sensor and end on a screen. In between there's a Flutter app, a Python or Java backend, and usually an AI model trying to make sense of the data. That whole path is the fun part.</p>
       <ul class="stat-row" data-rise>
         <li><b data-count="13">13</b> projects</li><li><b data-count="8">8</b> domains</li><li><b data-count="4">4</b> live deployments</li><li><b data-count="2">2</b> research internships</li>
       </ul>
@@ -104,15 +104,15 @@
 
   <!-- WORK -->
   <section class="work" id="work" aria-labelledby="work-title" data-stage="sphere" data-chapter="Work by domain">
-    <header class="work-head">
+    <header class="work-head" data-scene>
       <h2 id="work-title" class="h2" data-kinetic>Work by domain</h2>
-      <p class="sub" data-rise style="--i:1">Thirteen builds across eight sectors, from orbit to farm.</p>
+      <p class="sub" data-rise style="--i:1">13 projects, some live and some still on the workbench. Sorted by the problem they go after.</p>
     </header>
     <nav class="domain-nav" aria-label="Project domains"><ul><li><a href="#d-healthcare" style="--tint:#ff7ab6"><i></i>Healthcare<b>1</b></a></li><li><a href="#d-agriculture" style="--tint:#5effa8"><i></i>Agriculture<b>2</b></a></li><li><a href="#d-space" style="--tint:#6ee7ff"><i></i>Space & aerospace<b>2</b></a></li><li><a href="#d-ev" style="--tint:#ffc24a"><i></i>EV & energy<b>1</b></a></li><li><a href="#d-finance" style="--tint:#a78bfa"><i></i>Finance<b>1</b></a></li><li><a href="#d-climate" style="--tint:#2ee6d6"><i></i>Climate & environment<b>2</b></a></li><li><a href="#d-consumer" style="--tint:#ff9a5e"><i></i>Consumer tech<b>1</b></a></li><li><a href="#d-civic" style="--tint:#9db4ff"><i></i>Civic & services<b>2</b></a></li></ul></nav>
-    <section class="domain" id="d-healthcare" style="--tint:#ff7ab6" aria-labelledby="dh-healthcare" data-cut="Healthcare" data-cut-kicker="Work by domain">
+    <section class="domain" id="d-healthcare" style="--tint:#ff7ab6" aria-labelledby="dh-healthcare" data-scene>
       <header class="domain-head">
         <h3 id="dh-healthcare" class="domain-title" data-kinetic>Healthcare</h3>
-        <p class="domain-sub" data-rise>Rehab tech that measures what patients actually do. <span>1 project</span></p>
+        <p class="domain-sub" data-rise>Helping patients see if their rehab is working. <span>1 project</span></p>
       </header>
       <div class="glass-grid one">
         <article class="glass" style="--i:0" data-glass>
@@ -124,7 +124,7 @@
           <div class="g-body">
             <p class="g-status">Research prototype</p>
             <h4 class="g-title">HemoPhysio</h4>
-            <p class="g-line">A physiotherapy and rehabilitation app for people living with haemophilia, on a FastAPI backend with Firebase sign-in and storage. An ESP32-S3 reads MPU motion data and BioAmp muscle signals to track each exercise.</p>
+            <p class="g-line">A rehab app for people with haemophilia. An ESP32-S3 reads motion and muscle signals during each exercise, and the app shows how the session went. Flutter on the front, FastAPI and Firebase behind it.</p>
             <ul class="g-facts"><li>ESP32-S3</li><li>MPU + BioAmp</li><li>Flutter app</li></ul>
             <p class="g-stack">Flutter · Dart · FastAPI · Firebase · ESP32-S3</p>
             <div class="g-links"></div>
@@ -132,10 +132,10 @@
         </article>
       </div>
     </section>
-    <section class="domain" id="d-agriculture" style="--tint:#5effa8" aria-labelledby="dh-agriculture" data-cut="Agriculture" data-cut-kicker="Work by domain">
+    <section class="domain" id="d-agriculture" style="--tint:#5effa8" aria-labelledby="dh-agriculture" data-scene>
       <header class="domain-head">
         <h3 id="dh-agriculture" class="domain-title" data-kinetic>Agriculture</h3>
-        <p class="domain-sub" data-rise>Seeing crop problems early and acting only where needed. <span>2 projects</span></p>
+        <p class="domain-sub" data-rise>Catching crop disease early, and spraying only where it's needed. <span>2 projects</span></p>
       </header>
       <div class="glass-grid">
         <article class="glass" style="--i:0" data-glass>
@@ -146,7 +146,7 @@
           <div class="g-body">
             <p class="g-status">In progress</p>
             <h4 class="g-title">SmartSpray</h4>
-            <p class="g-line">An AI precision sprayer. YOLO detects crop disease and pests, a climate-risk model and a RAG knowledge base of verified treatments explain what to do, and an ESP32 drives the pump with safety interlocks.</p>
+            <p class="g-line">A sprayer that only sprays the sick plants. A YOLO model spots disease and pests, a knowledge base of verified treatments decides what to use, and an ESP32 runs the pump with safety cut-offs.</p>
             <ul class="g-facts"><li>Disease + pest AI</li><li>RAG treatments</li><li>ESP32 pump</li></ul>
             <p class="g-stack">YOLO · Gemini · RAG · FastAPI · Flutter · ESP32</p>
             <div class="g-links"><a class="g-link" href="https://github.com/dhruvsharma06-web/smart_spray_ai" target="_blank" rel="noopener">View repo <span aria-hidden="true">↗</span></a></div>
@@ -159,7 +159,7 @@
           <div class="g-body">
             <p class="g-status">Web app</p>
             <h4 class="g-title">Fieldwise</h4>
-            <p class="g-line">A farm and irrigation simulator: pick a crop and weather, run 30 days, and watch soil moisture and crop vitality respond to the irrigation schedule.</p>
+            <p class="g-line">Pick a crop and the weather, then run a month on a virtual farm. You see how your watering schedule changes soil moisture and crop health, day by day.</p>
             <ul class="g-facts"><li>30-day sim</li><li>Crop + weather</li><li>Irrigation plan</li></ul>
             <p class="g-stack">HTML · CSS · JavaScript</p>
             <div class="g-links"></div>
@@ -167,10 +167,10 @@
         </article>
       </div>
     </section>
-    <section class="domain" id="d-space" style="--tint:#6ee7ff" aria-labelledby="dh-space" data-cut="Space & aerospace" data-cut-kicker="Work by domain">
+    <section class="domain" id="d-space" style="--tint:#6ee7ff" aria-labelledby="dh-space" data-scene>
       <header class="domain-head">
         <h3 id="dh-space" class="domain-title" data-kinetic>Space & aerospace</h3>
-        <p class="domain-sub" data-rise>Orbits, debris and drones, checked with real data. <span>2 projects</span></p>
+        <p class="domain-sub" data-rise>Tracking space junk, and checking drones before they fly. <span>2 projects</span></p>
       </header>
       <div class="glass-grid">
         <article class="glass" style="--i:0" data-glass>
@@ -183,7 +183,7 @@
           <div class="g-body">
             <p class="g-status is-live">Live</p>
             <h4 class="g-title">OrbitGuard</h4>
-            <p class="g-line">A space-debris collision predictor. Propagates real orbit data for thousands of objects 24 hours ahead with SGP4, screens close approaches with a k-d tree, and shows them on a 3D globe with AI briefings and a maneuver simulator.</p>
+            <p class="g-line">It takes real orbit data for thousands of satellites and bits of debris, predicts the next 24 hours, and flags anything that gets too close. You can watch it all on a 3D globe and test a thruster burn to dodge.</p>
             <ul class="g-facts"><li>1,500 objects</li><li>24 h ahead</li><li>Real TLE data</li></ul>
             <p class="g-stack">Python · Flask · SGP4 · three.js · Ollama</p>
             <div class="g-links"><a class="g-link primary" href="https://orbit-guard-kappa.vercel.app" target="_blank" rel="noopener">Live demo <span aria-hidden="true">↗</span></a><a class="g-link" href="https://github.com/dhruvsharma06-web/orbit-guard" target="_blank" rel="noopener">View repo <span aria-hidden="true">↗</span></a></div>
@@ -198,7 +198,7 @@
           <div class="g-body">
             <p class="g-status">Hackathon</p>
             <h4 class="g-title">Pluto Drone Verifier</h4>
-            <p class="g-line">An Android app with an OpenCV and ML core that checks whether a drone's propellers are installed correctly, answering Pass, Incorrect or Unable to Verify. Built by a team of four on shared contracts.</p>
+            <p class="g-line">Built at a hackathon with three teammates. Point the phone at a drone and it checks whether each propeller is on the right way. If it isn't sure, it says so instead of guessing.</p>
             <ul class="g-facts"><li>OpenCV + ML</li><li>Android</li><li>Team of 4</li></ul>
             <p class="g-stack">Flutter · OpenCV · ML · Android</p>
             <div class="g-links"><a class="g-link" href="https://github.com/dhruvsharma06-web/Pluto-drone" target="_blank" rel="noopener">View repo <span aria-hidden="true">↗</span></a></div>
@@ -206,10 +206,10 @@
         </article>
       </div>
     </section>
-    <section class="domain" id="d-ev" style="--tint:#ffc24a" aria-labelledby="dh-ev" data-cut="EV & energy" data-cut-kicker="Work by domain">
+    <section class="domain" id="d-ev" style="--tint:#ffc24a" aria-labelledby="dh-ev" data-scene>
       <header class="domain-head">
         <h3 id="dh-ev" class="domain-title" data-kinetic>EV & energy</h3>
-        <p class="domain-sub" data-rise>Physics models that make battery health tangible. <span>1 project</span></p>
+        <p class="domain-sub" data-rise>What your driving does to your battery, eight years out. <span>1 project</span></p>
       </header>
       <div class="glass-grid one">
         <article class="glass" style="--i:0" data-glass>
@@ -224,7 +224,7 @@
           <div class="g-body">
             <p class="g-status is-live">Live</p>
             <h4 class="g-title">EV Twin</h4>
-            <p class="g-line">A physics-based digital twin of a 77 kWh EV pack. Simulates how driving, climate and charging habits age the battery over 8 years, with a local AI coach that re-simulates its own advice.</p>
+            <p class="g-line">A digital twin of a 77 kWh EV battery. Tell it how you drive, where you live and how you charge, and it shows your battery health over 8 years. Then a local AI coach suggests changes and re-runs the numbers.</p>
             <ul class="g-facts"><li>77 kWh pack</li><li>8-year aging</li><li>AI coach</li></ul>
             <p class="g-stack">Python · Flask · NumPy · Ollama</p>
             <div class="g-links"><a class="g-link primary" href="https://ev-twin.vercel.app" target="_blank" rel="noopener">Live demo <span aria-hidden="true">↗</span></a><a class="g-link" href="https://github.com/dhruvsharma06-web/ev-twin" target="_blank" rel="noopener">View repo <span aria-hidden="true">↗</span></a></div>
@@ -232,10 +232,10 @@
         </article>
       </div>
     </section>
-    <section class="domain" id="d-finance" style="--tint:#a78bfa" aria-labelledby="dh-finance" data-cut="Finance" data-cut-kicker="Work by domain">
+    <section class="domain" id="d-finance" style="--tint:#a78bfa" aria-labelledby="dh-finance" data-scene>
       <header class="domain-head">
         <h3 id="dh-finance" class="domain-title" data-kinetic>Finance</h3>
-        <p class="domain-sub" data-rise>Money tools that explain, never push products. <span>1 project</span></p>
+        <p class="domain-sub" data-rise>Making sense of your money without selling you anything. <span>1 project</span></p>
       </header>
       <div class="glass-grid one">
         <article class="glass" style="--i:0" data-glass>
@@ -248,7 +248,7 @@
           <div class="g-body">
             <p class="g-status is-live">Live</p>
             <h4 class="g-title">Kosh</h4>
-            <p class="g-line">An AI personal-finance coach for India. Reads messy bank CSVs, PDFs and SMS, learns your categories, catches subscriptions and runs what-if plans, while deterministic code does every rupee of math. Built entirely by voice for a hackathon.</p>
+            <p class="g-line">A money coach for India. Drop in bank statements, PDFs or SMS and it sorts your spending, spots subscriptions and answers what-if questions. The AI explains, plain code does the math. I built it entirely by voice for a hackathon.</p>
             <ul class="g-facts"><li>CSV · PDF · SMS</li><li>What-if planner</li><li>Built by voice</li></ul>
             <p class="g-stack">Next.js · React · TypeScript · Gemini</p>
             <div class="g-links"><a class="g-link primary" href="https://finance-coach-six.vercel.app" target="_blank" rel="noopener">Live demo <span aria-hidden="true">↗</span></a><a class="g-link" href="https://github.com/dhruvsharma06-web/finance-coach" target="_blank" rel="noopener">View repo <span aria-hidden="true">↗</span></a></div>
@@ -256,10 +256,10 @@
         </article>
       </div>
     </section>
-    <section class="domain" id="d-climate" style="--tint:#2ee6d6" aria-labelledby="dh-climate" data-cut="Climate & environment" data-cut-kicker="Work by domain">
+    <section class="domain" id="d-climate" style="--tint:#2ee6d6" aria-labelledby="dh-climate" data-scene>
       <header class="domain-head">
         <h3 id="dh-climate" class="domain-title" data-kinetic>Climate & environment</h3>
-        <p class="domain-sub" data-rise>Sensing the air and water around us. <span>2 projects</span></p>
+        <p class="domain-sub" data-rise>Keeping an eye on the air we breathe and the water we drink. <span>2 projects</span></p>
       </header>
       <div class="glass-grid">
         <article class="glass" style="--i:0" data-glass>
@@ -271,7 +271,7 @@
           <div class="g-body">
             <p class="g-status">Prototype</p>
             <h4 class="g-title">Pura Air</h4>
-            <p class="g-line">Real-time indoor air quality monitoring with multiple sensors on one ESP32, publishing over MQTT and built for AI prediction next.</p>
+            <p class="g-line">A handful of sensors on one ESP32, streaming indoor air quality live over MQTT. Next up: warning you before the air gets bad.</p>
             <ul class="g-facts"><li>Multi-sensor</li><li>MQTT live</li><li>AI-ready</li></ul>
             <p class="g-stack">ESP32 · MQTT · IoT</p>
             <div class="g-links"></div>
@@ -285,7 +285,7 @@
           <div class="g-body">
             <p class="g-status">Prototype</p>
             <h4 class="g-title">Pura Aqua</h4>
-            <p class="g-line">An affordable water-quality probe reading pH, TDS, turbidity and temperature, with embedded logic that recommends how to purify each sample.</p>
+            <p class="g-line">A cheap water tester. Four probes read pH, TDS, turbidity and temperature, and it tells you how to clean the sample.</p>
             <ul class="g-facts"><li>pH · TDS</li><li>Turbidity · Temp</li><li>Purify advice</li></ul>
             <p class="g-stack">ESP32 · Embedded C</p>
             <div class="g-links"></div>
@@ -293,10 +293,10 @@
         </article>
       </div>
     </section>
-    <section class="domain" id="d-consumer" style="--tint:#ff9a5e" aria-labelledby="dh-consumer" data-cut="Consumer tech" data-cut-kicker="Work by domain">
+    <section class="domain" id="d-consumer" style="--tint:#ff9a5e" aria-labelledby="dh-consumer" data-scene>
       <header class="domain-head">
         <h3 id="dh-consumer" class="domain-title" data-kinetic>Consumer tech</h3>
-        <p class="domain-sub" data-rise>Clear, sourced answers for people buying hardware. <span>1 project</span></p>
+        <p class="domain-sub" data-rise>Honest specs for people buying PC parts. <span>1 project</span></p>
       </header>
       <div class="glass-grid one">
         <article class="glass" style="--i:0" data-glass>
@@ -311,7 +311,7 @@
           <div class="g-body">
             <p class="g-status">Web app</p>
             <h4 class="g-title">Silicon Atlas</h4>
-            <p class="g-line">A browser-local CPU and GPU catalogue and upgrade guide: 43 manufacturer-sourced records with provenance, procedural die floorplans and a WebGL motion layer.</p>
+            <p class="g-line">A CPU and GPU guide for anyone upgrading their PC. 43 products, every spec linked back to the maker's own page, nothing made up.</p>
             <ul class="g-facts"><li>43 products</li><li>Sourced specs</li><li>WebGL</li></ul>
             <p class="g-stack">JavaScript · WebGL · Static</p>
             <div class="g-links"><a class="g-link" href="https://github.com/dhruvsharma06-web/silicon-atlas" target="_blank" rel="noopener">View repo <span aria-hidden="true">↗</span></a></div>
@@ -319,10 +319,10 @@
         </article>
       </div>
     </section>
-    <section class="domain" id="d-civic" style="--tint:#9db4ff" aria-labelledby="dh-civic" data-cut="Civic & services" data-cut-kicker="Work by domain">
+    <section class="domain" id="d-civic" style="--tint:#9db4ff" aria-labelledby="dh-civic" data-scene>
       <header class="domain-head">
         <h3 id="dh-civic" class="domain-title" data-kinetic>Civic & services</h3>
-        <p class="domain-sub" data-rise>Software that connects people to work and welfare. <span>2 projects</span></p>
+        <p class="domain-sub" data-rise>Connecting people to work, and checking that welfare reaches them. <span>2 projects</span></p>
       </header>
       <div class="glass-grid">
         <article class="glass" style="--i:0" data-glass>
@@ -332,7 +332,7 @@
           <div class="g-body">
             <p class="g-status">Full stack</p>
             <h4 class="g-title">SkillConnect</h4>
-            <p class="g-line">A platform connecting skilled professionals with customers, built on MVC with login, sessions and full CRUD.</p>
+            <p class="g-line">A site where people find and book local professionals. Plain Java on the server, with logins, sessions and a MySQL database.</p>
             <ul class="g-facts"><li>MVC</li><li>Sessions + auth</li><li>Full CRUD</li></ul>
             <p class="g-stack">Java · JSP · Servlets · JDBC · MySQL · Tomcat</p>
             <div class="g-links"></div>
@@ -345,7 +345,7 @@
           <div class="g-body">
             <p class="g-status">Analytics</p>
             <h4 class="g-title">WelfareWatch</h4>
-            <p class="g-line">Dashboards that evaluate how welfare schemes are delivered, comparing indicators and beneficiary trends.</p>
+            <p class="g-line">Dashboards that check whether welfare schemes actually reach the people they're meant for.</p>
             <ul class="g-facts"><li>SQL</li><li>Scheme KPIs</li><li>Trends</li></ul>
             <p class="g-stack">SQL · Dashboards</p>
             <div class="g-links"></div>
@@ -356,7 +356,7 @@
   </section>
 
   <!-- EXPERIENCE -->
-  <section class="experience" id="experience" data-cut="Experience" aria-labelledby="exp-title" data-stage="helix" data-chapter="Experience">
+  <section class="experience" id="experience" data-scene aria-labelledby="exp-title" data-stage="helix" data-chapter="Experience">
     <h2 id="exp-title" class="h2" data-kinetic>Experience</h2>
     <div class="timeline" id="timeline">
       <div class="tl-rail" aria-hidden="true"><i id="tlFill"></i></div>
@@ -364,21 +364,21 @@
         <p class="when">July 2026 — Present</p>
         <h3 class="role-title">Research Intern</h3>
         <p class="where">K. J. Somaiya College of Physiotherapy, Mumbai</p>
-        <p class="role-body">Building an IoT healthcare device for haemophilia monitoring and patient support with a multidisciplinary team. I handle hardware integration, sensor interfacing, embedded development and prototype testing.</p>
+        <p class="role-body">I'm on a team of physiotherapists and engineers building a device that helps monitor people with haemophilia. My side is the hardware: wiring the sensors, writing the firmware and testing each prototype.</p>
         <ul class="chips"><li>Hardware integration</li><li>Sensor interfacing</li><li>Embedded development</li><li>Prototype testing</li></ul>
       </article>
       <article class="role" data-rise style="--i:2">
         <p class="when">One month</p>
         <h3 class="role-title">Research Intern</h3>
         <p class="where">R&amp;D Cell, K. J. Somaiya Institute of Technology, Mumbai</p>
-        <p class="role-body">Contributed to an indoor air quality management system combining IoT hardware with AI concepts. Worked with faculty mentors on prototype design, hardware integration, validation and technical documentation.</p>
+        <p class="role-body">A month on an indoor air quality system that mixes IoT hardware with AI. I worked with faculty on the prototype, got the hardware talking, tested it and wrote it all up.</p>
         <ul class="chips"><li>Prototype design</li><li>Validation</li><li>Technical documentation</li></ul>
       </article>
     </div>
   </section>
 
   <!-- TECH STACK -->
-  <section class="toolkit" id="toolkit" data-cut="Tech stack" aria-labelledby="tk-title" data-stage="lattice" data-chapter="Tech stack">
+  <section class="toolkit" id="toolkit" data-scene aria-labelledby="tk-title" data-stage="lattice" data-chapter="Tech stack">
     <div class="tk-head">
       <h2 id="tk-title" class="h2" data-kinetic>Tech stack</h2>
       <p class="sub" data-rise style="--i:1"><span class="fine-only-inline">Hover</span><span class="touch-only-inline">Tap</span> a skill to see which projects use it.</p>
@@ -396,9 +396,9 @@
   </section>
 
   <!-- CONTACT -->
-  <section class="contact" id="contact" data-cut="Contact" aria-labelledby="ct-title" data-stage="galaxy" data-chapter="Contact">
-    <h2 id="ct-title" class="contact-title" data-kinetic>Let's build<br>what's next.</h2>
-    <div class="contact-me" data-rise style="--i:1"><span class="avatar av-contact"><span class="mono" aria-hidden="true">DS</span><img src="media/dhruv.jpg" alt="Dhruv Sharma" onerror="this.remove()"></span><p class="sub contact-sub">Open to internships, research and product work. Email is the fastest way to reach me.</p></div>
+  <section class="contact" id="contact" data-scene aria-labelledby="ct-title" data-stage="galaxy" data-chapter="Contact">
+    <h2 id="ct-title" class="contact-title" data-kinetic>Got something<br>to build?</h2>
+    <div class="contact-me" data-rise style="--i:1"><span class="avatar av-contact"><span class="mono" aria-hidden="true">DS</span><img src="media/dhruv.jpg" alt="Dhruv Sharma" onerror="this.remove()"></span><p class="sub contact-sub">I'm looking for internships, research work and good teams. Email me, I reply fast.</p></div>
     <div class="contact-actions" data-rise style="--i:2">
       <a class="mail" href="mailto:dhruv.sharma06@somaiya.edu" data-cursor="Email">dhruv.sharma06@somaiya.edu</a>
       <button class="btn btn-dark" type="button" id="copyMail" data-magnetic>Copy email</button>
@@ -425,7 +425,7 @@
     <a href="#top">Back to top <span aria-hidden="true">↑</span></a>
   </div>
 </footer>
-<div class="cut" id="cut" aria-hidden="true"><div class="cut-panel"></div><p class="cut-kicker" id="cutKicker"></p><p class="cut-title" id="cutTitle"></p></div>
+
 
 <script src="core.js" defer></script>
 <script src="main.js" defer></script>
