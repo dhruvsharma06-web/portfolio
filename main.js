@@ -74,16 +74,54 @@
   const glasses = $$('[data-glass]');
   const gIO = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('on'); gIO.unobserve(e.target); } }), { rootMargin: '0px 0px -12% 0px' });
   glasses.forEach((g) => gIO.observe(g));
+  // ambient animations inside a card run only while it is on screen
+  const visIO = new IntersectionObserver((es) => es.forEach((e) => e.target.classList.toggle('vis', e.isIntersecting)), { rootMargin: '10% 0px' });
+  glasses.forEach((g) => visIO.observe(g));
   if (fine && motion) {
-    glasses.forEach((g) => {
-      g.addEventListener('pointermove', (e) => {
-        const r = g.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-        g.style.setProperty('--gx', `${(x * 100).toFixed(1)}%`); g.style.setProperty('--gy', `${(y * 100).toFixed(1)}%`);
-        g.style.setProperty('--ry', `${((x - .5) * 6).toFixed(2)}deg`); g.style.setProperty('--rx', `${((.5 - y) * 5).toFixed(2)}deg`);
-      });
-      g.addEventListener('pointerleave', () => { g.style.setProperty('--ry', '0deg'); g.style.setProperty('--rx', '0deg'); });
+    glasses.forEach((g) => g.addEventListener('pointermove', (e) => {
+      const r = g.getBoundingClientRect();
+      g.style.setProperty('--gx', `${(((e.clientX - r.left) / r.width) * 100).toFixed(1)}%`);
+      g.style.setProperty('--gy', `${(((e.clientY - r.top) / r.height) * 100).toFixed(1)}%`);
+    }));
+  }
+
+  /* ---------- Full-window scene cut when a new section arrives (scrolling down) */
+  const cut = $('#cut'), cutT = $('#cutTitle'), cutK = $('#cutKicker'), cutP = cut && $('.cut-panel', cut);
+  if (motion && cut) {
+    const secs = $$('[data-cut]'), fired = new Set(); let lastY = scrollY, busy = false;
+    const EIO = 'cubic-bezier(0.77, 0, 0.175, 1)', EO = 'cubic-bezier(0.23, 1, 0.32, 1)';
+    const play = (s) => {
+      busy = true;
+      const tint = getComputedStyle(s).getPropertyValue('--tint').trim();
+      cut.style.setProperty('--tint', tint || '#a78bfa');
+      cutK.textContent = s.dataset.cutKicker || 'Next';
+      cutT.innerHTML = [...s.dataset.cut].map((c, i) => `<span class="kl" style="--n:${i}">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
+      cut.classList.add('run');
+      cutP.animate([
+        { clipPath: 'inset(100% 0 0 0)', offset: 0, easing: EIO },
+        { clipPath: 'inset(0% 0 0 0)', offset: .3 },
+        { clipPath: 'inset(0 0 0% 0)', offset: .66, easing: EIO },
+        { clipPath: 'inset(0 0 100% 0)', offset: 1 }], { duration: 1500, fill: 'both' });
+      cutK.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none', offset: .35 }, { opacity: 1, transform: 'none', offset: .66 }, { opacity: 0, transform: 'translateY(-16px)' }], { duration: 1500, fill: 'both', easing: EO });
+      cutT.querySelectorAll('.kl').forEach((k, i) => k.animate([
+        { opacity: 0, transform: 'translateY(60%) rotateX(-70deg)', filter: 'blur(8px)' },
+        { opacity: 1, transform: 'none', filter: 'blur(0)', offset: .4 },
+        { opacity: 1, transform: 'none', filter: 'blur(0)', offset: .68 },
+        { opacity: 0, transform: 'translateY(-40%)', filter: 'blur(6px)' }], { duration: 1500, delay: i * 18, fill: 'both', easing: EO }));
+      setTimeout(() => { cut.classList.remove('run'); busy = false; }, 1500 + s.dataset.cut.length * 18 + 40);
+    };
+    DS.onFrame(() => {
+      const y = scrollY, down = y > lastY + 0.5; lastY = y;
+      for (const s of secs) {
+        const top = s.getBoundingClientRect().top;
+        if (top > state.vh * 0.95) { fired.delete(s); continue; }
+        if (fired.has(s)) continue;
+        if (down && !busy && top < state.vh * 0.6 && top > state.vh * 0.05) { fired.add(s); play(s); }
+        else if (top <= state.vh * 0.05) fired.add(s);
+      }
     });
   }
+
   // domain nav: highlight the section in view, keep the active chip visible
   const dLinks = $$('.domain-nav a'), dSecs = $$('.domain');
   if (dLinks.length) {
