@@ -325,21 +325,33 @@ void main(){
     DS.rebuildFilm = build;
   })();
 
-  /* ---------- Cursor */
+  /* ---------- Cursor: an exact dot plus a trailing ring that reacts to what's under it */
   if (fine && motion) {
-    const cur = $('.cursor'), lab = $('.cursor-label');
-    let cx = innerWidth / 2, cy = innerHeight / 2, tx = cx, ty = cy;
-    addEventListener('pointermove', (e) => { tx = e.clientX; ty = e.clientY; cur.classList.add('on'); }, { passive: true });
-    document.addEventListener('pointerleave', () => cur.classList.remove('on'));
-    DS.onFrame(() => { cx += (tx - cx) * 0.2; cy += (ty - cy) * 0.2; cur.style.transform = `translate3d(${cx.toFixed(1)}px,${cy.toFixed(1)}px,0)`; });
+    const cur = $('.cursor'), lab = $('.cursor-label'), dotEl = $('.cursor-dot');
+    root.classList.add('has-cursor');
+    let cx = innerWidth / 2, cy = innerHeight / 2, tx = cx, ty = cy, shown = false;
+    addEventListener('pointermove', (e) => {
+      tx = e.clientX; ty = e.clientY;
+      dotEl.style.transform = `translate3d(${tx}px,${ty}px,0)`;
+      if (!shown) { cx = tx; cy = ty; shown = true; }
+      cur.classList.add('on'); dotEl.classList.add('on');
+    }, { passive: true });
+    document.addEventListener('pointerleave', () => { cur.classList.remove('on'); dotEl.classList.remove('on'); });
+    addEventListener('pointerdown', () => cur.classList.add('down'));
+    addEventListener('pointerup', () => cur.classList.remove('down'));
+    DS.onFrame(() => { cx += (tx - cx) * 0.22; cy += (ty - cy) * 0.22; cur.style.transform = `translate3d(${cx.toFixed(1)}px,${cy.toFixed(1)}px,0)`; });
+    const HOT = 'a, button, [role="slider"], .skill, [data-glass]';
     document.addEventListener('pointerover', (e) => {
       const l = e.target.closest('[data-cursor]');
-      if (l) { lab.textContent = l.dataset.cursor; cur.classList.add('label'); cur.classList.remove('big'); return; }
-      if (e.target.closest('a, button, [role="slider"]')) cur.classList.add('big');
+      if (l) { lab.textContent = l.dataset.cursor; cur.classList.add('label'); return; }
+      const h = e.target.closest(HOT);
+      if (h) { cur.classList.toggle('big', !h.matches('[data-glass]')); cur.classList.toggle('card', h.matches('[data-glass]')); dotEl.classList.toggle('hide', !h.matches('[data-glass]')); }
+      if (e.target.closest('p, h1, h2, h3, h4, li') && !h) cur.classList.add('text');
     });
     document.addEventListener('pointerout', (e) => {
       if (e.target.closest('[data-cursor]')) cur.classList.remove('label');
-      if (e.target.closest('a, button, [role="slider"]')) cur.classList.remove('big');
+      if (e.target.closest(HOT)) { cur.classList.remove('big', 'card'); dotEl.classList.remove('hide'); }
+      cur.classList.remove('text');
     });
     $$('[data-magnetic]').forEach((el) => {
       el.addEventListener('pointermove', (e) => {

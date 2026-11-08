@@ -660,3 +660,22 @@ html.bar-stuck .progress { top: 0; }
 
 html, html.motion { scroll-snap-type: none; }
 .hand { fill: #2a2a33; stroke: #6b6b80; stroke-width: 2; } .pinch { fill: none; stroke: #6ee7ff; stroke-width: 3; } .planet { stroke: none; }
+
+/* ---------- Pointer: dot + trailing ring, native arrow hidden */
+@media (hover: hover) and (pointer: fine) {
+  html.has-cursor, html.has-cursor * { cursor: none !important; }
+  .motion .cursor { width: 34px; height: 34px; margin: -17px 0 0 -17px; background: transparent; mix-blend-mode: normal;
+    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.55); backdrop-filter: none; z-index: 151;
+    transition: opacity 200ms ease, width 300ms var(--ease-out), height 300ms var(--ease-out), margin 300ms var(--ease-out), background-color 300ms ease, box-shadow 300ms ease; }
+  .motion .cursor.big { width: 58px; height: 58px; margin: -29px 0 0 -29px; background: rgba(255,255,255,.12); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.9); }
+  .motion .cursor.card { width: 46px; height: 46px; margin: -23px 0 0 -23px; box-shadow: inset 0 0 0 1.5px rgba(167,139,250,.9); }
+  .motion .cursor.text { width: 24px; height: 24px; margin: -12px 0 0 -12px; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.35); }
+  .motion .cursor.label { width: 84px; height: 84px; margin: -42px 0 0 -42px; background: #fff; box-shadow: none; }
+  .motion .cursor.down { width: 26px; height: 26px; margin: -13px 0 0 -13px; }
+  .cursor-dot { display: none; }
+  .motion .cursor-dot { display: block; position: fixed; left: 0; top: 0; z-index: 152; pointer-events: none; width: 6px; height: 6px; margin: -3px 0 0 -3px;
+    border-radius: 50%; background: #fff; opacity: 0; transition: opacity 150ms ease, width 200ms var(--ease-out), height 200ms var(--ease-out), margin 200ms var(--ease-out); }
+  .motion .cursor-dot.on { opacity: 1; }
+  .motion .cursor-dot.hide { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { html.has-cursor, html.has-cursor * { cursor: auto !important; } }
