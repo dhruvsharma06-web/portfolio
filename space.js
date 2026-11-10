@@ -33,6 +33,15 @@ const PLANETS = {
   Pluto:   { kind: 0, a: '#a8937c', b: '#eadfcf', c: '#7d6450', size: 0.46, atmo: '#ffffff', atmoA: 0.2, seed: 9.9 },
 };
 const ORDER = Object.keys(PLANETS);
+const worldBtns = $$('.world-btn');
+let hoverWorld = -1;
+worldBtns.forEach((b, i) => {
+  const d = PLANETS[b.dataset.planet]; if (d) b.style.setProperty('--sz', d.size);
+  b.addEventListener('pointerenter', () => { hoverWorld = i; });
+  b.addEventListener('pointerleave', () => { if (hoverWorld === i) hoverWorld = -1; });
+  b.addEventListener('focus', () => { hoverWorld = i; });
+  b.addEventListener('blur', () => { if (hoverWorld === i) hoverWorld = -1; });
+});
 
 /* ---------- WebGL setup */
 const canvas = $('#space');
@@ -68,11 +77,18 @@ function start() {
       uSteps: { value: 200 }, uShift: { value: new THREE.Vector2() }, uZoom: { value: 2.1 } },
   });
   bhScene.add(flat(bhMat, 0));
-  const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType });
-  let rtQ = 0.62;
+  const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter });
+  let rtQ = innerWidth < 760 ? 0.6 : 0.75;
   const bhBlit = flat(new THREE.ShaderMaterial({
     vertexShader: FULLSCREEN_VS, transparent: true, depthTest: false, depthWrite: false,
-    fragmentShader: 'precision highp float; varying vec2 vUv; uniform sampler2D tMap; uniform float uA; void main(){ gl_FragColor = vec4(texture2D(tMap, vUv).rgb * uA, 1.); }',
+    fragmentShader: `precision highp float; varying vec2 vUv; uniform sampler2D tMap; uniform float uA;
+      void main() {
+        vec3 c = textureLod(tMap, vUv, 0.).rgb;
+        // cheap bloom from the mip chain: the disk glows into the dark around it
+        vec3 g = textureLod(tMap, vUv, 3.).rgb * .35 + textureLod(tMap, vUv, 5.).rgb * .45 + textureLod(tMap, vUv, 6.5).rgb * .5;
+        c += g * vec3(1., .82, .62) * .55;
+        gl_FragColor = vec4(c * uA, 1.);
+      }`,
     uniforms: { tMap: { value: rt.texture }, uA: { value: 1 } },
   }), 0);
   scene.add(bhBlit);
@@ -104,6 +120,10 @@ function start() {
     return { g, body, mat, atmoMat, ring, d, hover: 0,
       set(op) { mat.uniforms.uOpacity.value = op; atmoMat.uniforms.uOpacity.value = op; if (ring) ring.material.uniforms.uOpacity.value = op; g.visible = op > 0.002; } };
   }
+
+  // the nine planets you scroll past at the top of the work section
+  const trackPlanets = worldBtns.map((b) => { const p = makePlanet(b.dataset.planet, true); scene.add(p.g); return p; });
+  const orbs = worldBtns.map((b) => $('.world-orb', b));
 
   // one planet behind each domain section of the work list
   const domainSecs = $$('[data-space="planet"]');
@@ -195,7 +215,8 @@ function start() {
   const sec = (k) => $(`[data-space="${k}"]`);
   const heroSec = sec('bh'), sunSec = sec('sun'), workSec = sec('work'), expSec = sec('earth'), stackSec = sec('stack'), contactSec = sec('land');
   const stops = [sunSec, workSec, expSec, stackSec, contactSec];
-  const L = { bounds: [], max: 1, descentFrom: 0, workTop: 0, workH: 1 };
+  const L = { bounds: [], max: 1, descentFrom: 0, workTop: 0, workH: 1, orbitTop: 0, travel: 1, slot: 300 };
+  const orbitEl = $('#orbit'), worldsEl = $('#worlds'), orbitRail = $('#orbitRail');
 
   function layout() {
     S.W = innerWidth; S.H = innerHeight; S.mobile = S.W < 760;
@@ -204,12 +225,20 @@ function start() {
     cam.left = -S.W / 2; cam.right = S.W / 2; cam.top = S.H / 2; cam.bottom = -S.H / 2; cam.updateProjectionMatrix();
     rt.setSize(Math.max(2, Math.round(S.W * rtQ)), Math.max(2, Math.round(S.H * rtQ)));
     bhMat.uniforms.uRes.value.set(rt.width, rt.height);
-    bhMat.uniforms.uShift.value.set(S.mobile ? 0 : 0.12, S.mobile ? 0.12 : 0.06);
-    bhMat.uniforms.uZoom.value = S.W / S.H < 0.8 ? 1.25 : 2.1;
+    bhMat.uniforms.uShift.value.set(S.mobile ? 0 : 0.1, S.mobile ? 0.2 : 0.1);
+    bhMat.uniforms.uZoom.value = S.W / S.H < 0.8 ? 1.15 : 1.85;
     landMat.uniforms.uRes.value.set(S.W, S.H);
     landMat.uniforms.uPadPos.value.set(S.mobile ? 0.86 : 0.86, S.mobile ? 0.27 : 0.32);
     smokeMat.uniforms.uDpr.value = dpr;
+    if (orbitEl && motion) {
+      L.slot = S.mobile ? S.W * 0.8 : clamp(S.W * 0.3, 300, 470);
+      worldsEl.style.setProperty('--track-pad', `${(S.W - L.slot) / 2}px`);
+      $$('.world', worldsEl).forEach((w) => w.style.setProperty('--slot', `${L.slot}px`));
+      L.travel = L.slot * (ORDER.length - 1);
+      orbitEl.style.setProperty('--orbit-h', `${S.H + L.travel + S.H * 0.25}px`);
+    }
     const top = (el) => el.getBoundingClientRect().top + scrollY;
+    if (orbitEl) L.orbitTop = top(orbitEl);
     L.bounds = stops.map(top);
     L.workTop = top(workSec); L.workH = workSec.offsetHeight;
     L.max = document.documentElement.scrollHeight - S.H;
@@ -245,6 +274,13 @@ function start() {
     if (k === 0) return { x: m ? 0.82 : 0.56, y: (m ? 0.52 : 0.6) + Math.sin(time * 1.3) * 0.008, a: 32 + Math.sin(time * 0.9) * 3, sz: 1, pow: 0.55, z: 1500 };
     if (k === 1) return { x: m ? 0.84 : 0.6, y: m ? 0.15 : 0.2, a: 72 + Math.sin(time) * 3, sz: 0.85, pow: 0.75, z: 1500 };
     if (k === 2) {
+      const or = orbitEl && orbitEl.getBoundingClientRect();
+      if (or && or.top < S.H * 0.3 && or.bottom > S.H * 0.6) {
+        // ride the progress line under the planets
+        const p = clamp((S.y - L.orbitTop) / Math.max(1, L.travel));
+        const rr = orbitRail.parentElement.getBoundingClientRect();
+        return { x: (rr.left + 30 + p * (rr.width - 60)) / W, y: (rr.top - (m ? 16 : 20)) / H + Math.sin(time * 1.6) * 0.003, a: 90 + Math.sin(time * 1.1) * 3, sz: 0.5, pow: 0.75, z: 1500 };
+      }
       const p = clamp((S.y - L.workTop) / Math.max(1, L.workH - S.H));
       return { x: mix(0.06, 0.94, p), y: 0.955 + Math.sin(time * 1.6) * 0.003, a: 90 + Math.sin(time * 1.1) * 3, sz: 0.5, pow: 0.75, z: 1500 };
     }
@@ -325,6 +361,27 @@ function start() {
         o.p.set(w1);
       });
     }
+
+    // the planet track
+    if (orbitEl && motion) {
+      const p = clamp((S.y - L.orbitTop) / Math.max(1, L.travel));
+      worldsEl.style.transform = `translate3d(${(-p * L.travel).toFixed(1)}px,0,0)`;
+      orbitRail.style.setProperty('--p', p.toFixed(4));
+    }
+    const orbitVis = orbitEl ? clamp(cover(orbitEl) * 1.8) : 0;
+    trackPlanets.forEach((pl, i) => {
+      const r = orbs[i].getBoundingClientRect();
+      if (motion) { const dx = Math.abs(r.left + r.width / 2 - S.W / 2) / L.slot; worldBtns[i].style.setProperty('--focus', (1 - clamp(dx * (S.mobile ? 0.9 : 0.32), 0, 0.8)).toFixed(3)); }
+      const on = orbitVis > 0.002 && r.width > 0 && r.right > -r.width && r.left < S.W + r.width && r.bottom > -r.height && r.top < S.H + r.height;
+      if (!on) { pl.set(0); return; }
+      pl.hover += ((hoverWorld === i ? 1 : 0) - pl.hover) * 0.12;
+      pl.g.position.copy(px(r.left + r.width / 2, r.top + r.height / 2));
+      pl.g.scale.setScalar((r.width / 2) * (1 + pl.hover * 0.06));
+      pl.body.rotation.y = time * 0.12 + i;
+      pl.mat.uniforms.uTime.value = time; pl.mat.uniforms.uHover.value = pl.hover;
+      pl.mat.uniforms.uSun.value.set(-0.75, 0.4, 0.55).normalize();
+      pl.set(orbitVis);
+    });
 
     // a planet rises behind each domain
     backdrops.forEach(({ el, p }, i) => {
@@ -419,6 +476,7 @@ function start() {
     const draw = () => { q = false; frame(performance.now()); };
     const ask = () => { if (!q) { q = true; requestAnimationFrame(draw); } };
     addEventListener('scroll', ask, { passive: true }); addEventListener('resize', ask);
+    worldBtns.forEach((b) => { b.addEventListener('pointerenter', ask); b.addEventListener('pointerleave', ask); });
     ask(); setTimeout(ask, 300);
   }
   window.__space = { S, L, renderer, draw: () => frame(performance.now()) };

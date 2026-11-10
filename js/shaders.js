@@ -68,20 +68,23 @@ void main() {
     if (pos.y * npos.y < 0.) {
       vec3 hit = mix(pos, npos, pos.y / (pos.y - npos.y));
       float rr = length(hit.xz);
-      if (rr > 2.6 && rr < 15.) {
-        float ang = atan(hit.z, hit.x);
-        float spin = uTime * 2.2 / pow(rr, 1.5);
-        float n = fbm(vec2(rr * 2.4, (ang + spin) * 6.)) * .7 + fbm(vec2(rr * 7., (ang + spin) * 18.)) * .3;
-        float temp = clamp(1. - (rr - 2.6) / 12.4, 0., 1.);
-        float streak = pow(clamp(n * 1.25, 0., 1.), 2.2);
-        float dens = smoothstep(2.6, 3.1, rr) * smoothstep(15., 8., rr) * (.12 + streak * 1.1);
-        vec3 hot = mix(vec3(1., .38, .08), vec3(1., .8, .48), pow(temp, .7));
-        hot = mix(hot, vec3(1., .97, .92), pow(temp, 3.));
+      if (rr > 2.6 && rr < 14.) {
+        // differential rotation: inner gas laps the outer gas
+        float spin = uTime * 1.4 / pow(rr, 1.5);
+        float cs = cos(spin), sn = sin(spin);
+        vec2 q = mat2(cs, -sn, sn, cs) * hit.xz;
+        float clumps = fbm(q * 1.1 + 7.);
+        float fine = .5 + .5 * sin(rr * 34. + clumps * 9.);
+        float streak = clumps * .75 + fine * .25 + fbm(vec2(rr * 6., clumps * 3.)) * .25;
+        float temp = clamp(1. - (rr - 2.6) / 11.4, 0., 1.);
+        float dens = smoothstep(2.6, 2.85, rr) * smoothstep(14., 7.5, rr) * (.35 + .8 * streak);
+        vec3 hot = mix(vec3(.85, .3, .06), vec3(1., .7, .34), pow(temp, .8));
+        hot = mix(hot, vec3(1., .95, .84), pow(temp, 4.));
         vec3 vd = normalize(vec3(-hit.z, 0., hit.x));
         float dop = dot(vd, normalize(vel));
-        float beam = pow(1. + .55 * dop, 3.);
-        vec3 dc = hot * dens * (.7 + 1.8 * pow(temp, 2.5)) * beam;
-        float a = clamp(dens * .8, 0., 1.);
+        float beam = pow(1. + .6 * dop, 3.);
+        vec3 dc = hot * dens * (.75 + 2.4 * pow(temp, 3.)) * beam;
+        float a = clamp(dens * .85, 0., 1.);
         col += (1. - alpha) * dc * a; alpha += (1. - alpha) * a;
         if (alpha > .985) break;
       }
@@ -92,8 +95,9 @@ void main() {
   // full bending near the hole, softened far out so distant stars stay points
   vec3 bg = starsDir(normalize(mix(rd, normalize(vel), mix(.3, 1., smoothstep(13., 4., minR)))));
   col += (1. - alpha) * bg;
-  // soft photon-ring glow
-  col = 1. - exp(-col * .95);                                  // filmic-ish tonemap
+  // thin photon ring hugging the shadow
+  col += (1. - alpha) * vec3(1., .78, .52) * exp(-abs(minR - 1.52) * 40.) * .45;
+  col = 1. - exp(-col * 1.05);
   col *= uFade;
   gl_FragColor = vec4(col, 1.);
 }
