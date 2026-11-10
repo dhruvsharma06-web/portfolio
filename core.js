@@ -185,7 +185,8 @@ void main(){
         arr[i * 3 + 1] = h / 2 - (pts[q * 2 + 1] + top) + (Math.random() - 0.5) * step * 0.6;
         arr[i * 3 + 2] = 0;
       }
-      dust(arr, used);
+      // no loose dust around the name: spare particles double up on the letters
+      for (let i = used; i < N; i++) { const q = idx[(Math.random() * used) | 0]; arr[i * 3] = pts[q * 2] - w / 2 + (Math.random() - 0.5) * step; arr[i * 3 + 1] = h / 2 - (pts[q * 2 + 1] + top) + (Math.random() - 0.5) * step; arr[i * 3 + 2] = 0; }
       return { arr, size: Math.max(2, step * 1.15) };
     }
     function terrain() {

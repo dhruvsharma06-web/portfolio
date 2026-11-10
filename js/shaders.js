@@ -20,19 +20,22 @@ float fbm3(vec3 p) { float a = .5, s = 0.; for (int i = 0; i < 5; i++) { s += a 
 
 /* Starfield sampled by direction, shared by the black hole background */
 const STARS = /* glsl */`
-vec3 starLayer(vec2 sp, float sc, float thr, float seed) {
-  vec2 g = sp * sc; vec2 id = floor(g); vec2 f = fract(g);
-  float h = hash12(id + seed);
+// stars live in 3D cells around the viewer, so they stay round in every direction
+vec3 starLayer(vec3 d, float sc, float thr, float seed) {
+  vec3 p = d * sc; vec3 id = floor(p); vec3 f = fract(p);
+  float h = hash13(id + seed);
   if (h < thr) return vec3(0.);
-  vec2 c = vec2(hash12(id + seed + 1.7), hash12(id + seed + 9.1)) * .6 + .2;
-  float d = length(f - c);
-  float b = smoothstep(.09, 0., d) * (h - thr) / (1. - thr);
-  vec3 tint = mix(vec3(.7, .82, 1.), vec3(1., .86, .7), hash12(id + 4.4));
-  return tint * b;
+  vec3 c = vec3(hash13(id + seed + 1.7), hash13(id + seed + 9.1), hash13(id + seed + 5.3)) * .5 + .25;
+  float dd = length(f - c);
+  float mag = (h - thr) / (1. - thr);
+  float core = smoothstep(.09 + mag * .06, 0., dd);
+  float halo = exp(-dd * dd * 90.) * .3 * mag;
+  vec3 tint = mix(vec3(.72, .82, 1.), vec3(1., .86, .68), hash13(id + 4.4));
+  return tint * (core + halo) * (.5 + mag);
 }
 vec3 starsDir(vec3 d) {
+  vec3 c = starLayer(d, 70., .86, 0.) * 2.;
   vec2 sp = vec2(atan(d.z, d.x) / 6.2831, asin(clamp(d.y, -1., 1.)) / 3.1416);
-  vec3 c = starLayer(sp, 220., .93, 0.) * 2.2 + starLayer(sp, 520., .9, 13.) * 1.1;
   float band = exp(-pow(d.y * 2.4 - .35 * d.x, 2.) * 5.);
   c += vec3(.16, .13, .22) * band * pow(fbm(sp * 14.), 2.) * .9;
   return c;
@@ -152,9 +155,9 @@ void main() {
     col += mix(vec3(.7, .8, 1.), uTint, h) * on * (.35 + .9 * z) * (1. - fl * .25);
   }
   // still stars when not warping
-  vec2 g = vUv * uRes / 3.;
-  float s = hash12(floor(g));
-  col += vec3(step(.9965, s)) * (1. - uWarp) * (.4 + .6 * hash12(floor(g) + 1.)) * (.6 + .4 * sin(uTime * 2. + s * 50.));
+  vec2 g = vUv * uRes / 16.; float s = hash12(floor(g));
+  float sd = length(fract(g) - .5) * 16.;
+  col += vec3(step(.95, s) * smoothstep(1.8, 0., sd)) * (1. - uWarp) * (.5 + .5 * hash12(floor(g) + 1.));
   col += uTint * exp(-r * 5.) * uWarp * uWarp * .35;
   col *= 1. + uWarp * .6;
   gl_FragColor = vec4(col * uAlpha, 1.);
@@ -294,8 +297,14 @@ void main() {
   vec3 sky = mix(vec3(.01, .02, .06), vec3(.02, .07, .12), smoothstep(.2, .9, 1. - uv.y));
   sky = mix(sky, vec3(.04, .12, .16), smoothstep(.55, .25, uv.y) * .6);
   // stars
-  vec2 g = uv * uRes / 2.5; float s = hash12(floor(g));
-  sky += vec3(step(.997, s)) * (.5 + .5 * sin(uTime * 3. + s * 40.)) * smoothstep(.3, .7, uv.y);
+  vec2 g = uv * uRes / 18.; vec2 gid = floor(g); float s = hash12(gid);
+  if (s > .93) {
+    vec2 sc = vec2(hash12(gid + 3.1), hash12(gid + 7.7)) * .6 + .2;
+    float d = length(fract(g) - sc) * 18.;                     // distance in px
+    float mag = (s - .93) / .07;
+    float star = smoothstep(1.2 + mag * 1.2, 0., d) + exp(-d * d * .08) * .25 * mag;
+    sky += mix(vec3(.75, .85, 1.), vec3(1., .9, .75), hash12(gid + 1.3)) * star * (.5 + .5 * mag) * (.75 + .25 * sin(uTime * 2. + s * 60.)) * smoothstep(.3, .7, uv.y);
+  }
   // aurora curtains
   vec3 au = vec3(0.);
   for (int i = 0; i < 3; i++) {

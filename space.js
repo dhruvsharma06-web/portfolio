@@ -536,7 +536,7 @@ function start() {
       workCorona.position.copy(wp).setZ(-1100); workCorona.scale.setScalar(wr * 2.8); workCorona.material.uniforms.uAlpha.value = 0.45 * orbitVis;
     }
     // the particle film steps back during jumps and around the planets
-    if (film) film.style.opacity = (1 - orbitVis * 0.7).toFixed(3);
+    if (film) film.style.opacity = clamp(cover(heroSec) * 1.4).toFixed(3);   // the particle stars only make the name now
 
     // a planet rises behind each domain
     backdrops.forEach(({ el, p }, i) => {
