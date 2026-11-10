@@ -17,42 +17,9 @@ const sstep = (a, b, v) => { const t = clamp((v - a) / (b - a)); return t * t * 
 const easeIO = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 const mixAngle = (a, b, t) => { let d = ((b - a + 540) % 360) - 180; return a + d * t; };
-const landed = () => root.classList.add('landed');
 const SHOT = new URLSearchParams(location.search).has('shot'); // still frames for testing
 
-/* ---------- Page behaviour that doesn't need WebGL */
-const revealIO = new IntersectionObserver((es) => es.forEach((e) => {
-  if (e.isIntersecting) { e.target.classList.add('in'); revealIO.unobserve(e.target); }
-}), { rootMargin: '0px 0px -12% 0px' });
-$$('[data-in]').forEach((el, i) => { if (!motion) el.classList.add('in'); else revealIO.observe(el); });
-
-let hoverWorld = -1;
-const worldBtns = $$('[data-sheet]');
-function closeSheet(d) {
-  if (!d.open) return;
-  if (!motion) { d.close(); return; }
-  d.classList.add('closing');
-  setTimeout(() => { d.classList.remove('closing'); d.close(); }, 250);
-}
-worldBtns.forEach((b, i) => {
-  b.addEventListener('click', () => {
-    const d = document.getElementById(b.dataset.sheet);
-    if (!d) return;
-    d.showModal();
-    d.scrollTop = 0;
-    $$('.glass', d).forEach((g) => g.classList.add('on', 'vis'));
-  });
-  b.addEventListener('pointerenter', () => { hoverWorld = i; });
-  b.addEventListener('pointerleave', () => { if (hoverWorld === i) hoverWorld = -1; });
-  b.addEventListener('focus', () => { hoverWorld = i; });
-  b.addEventListener('blur', () => { if (hoverWorld === i) hoverWorld = -1; });
-});
-$$('dialog.sheet').forEach((d) => {
-  $('[data-close]', d).addEventListener('click', () => closeSheet(d));
-  d.addEventListener('click', (e) => { if (e.target === d) closeSheet(d); });
-});
-
-/* ---------- Planet catalogue (order matches the track) */
+/* ---------- Planet catalogue */
 const C = (h) => new THREE.Color(h);
 const PLANETS = {
   Mercury: { kind: 0, a: '#6d6a66', b: '#aaa49c', c: '#3f3c39', size: 0.58, atmo: '#ffffff', atmoA: 0.25, seed: 1.3 },
@@ -66,7 +33,6 @@ const PLANETS = {
   Pluto:   { kind: 0, a: '#a8937c', b: '#eadfcf', c: '#7d6450', size: 0.46, atmo: '#ffffff', atmoA: 0.2, seed: 9.9 },
 };
 const ORDER = Object.keys(PLANETS);
-worldBtns.forEach((b) => { const p = PLANETS[b.dataset.planet]; if (p) b.style.setProperty('--sz', p.size); });
 
 /* ---------- WebGL setup */
 const canvas = $('#space');
@@ -77,7 +43,6 @@ try {
 
 if (!renderer) {
   root.classList.add('no-gl');
-  landed();
 } else {
   start();
 }
@@ -112,13 +77,6 @@ function start() {
   }), 0);
   scene.add(bhBlit);
 
-  /* --- star warp */
-  const warpMat = new THREE.ShaderMaterial({
-    vertexShader: FULLSCREEN_VS, fragmentShader: WARP_FS, transparent: true, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending,
-    uniforms: { uRes: { value: new THREE.Vector2() }, uTime: { value: 0 }, uWarp: { value: 0 }, uAlpha: { value: 0 }, uTint: { value: C('#9fd8ff') } },
-  });
-  const warp = flat(warpMat, 1); scene.add(warp);
-
   /* --- planets */
   const sphereHi = new THREE.SphereGeometry(1, 96, 64), sphereLo = new THREE.SphereGeometry(1, 48, 32);
   const ringGeo = new THREE.RingGeometry(1.32, 2.1, 128, 1);
@@ -147,9 +105,9 @@ function start() {
       set(op) { mat.uniforms.uOpacity.value = op; atmoMat.uniforms.uOpacity.value = op; if (ring) ring.material.uniforms.uOpacity.value = op; g.visible = op > 0.002; } };
   }
 
-  // the nine worlds on the projects track
-  const track = ORDER.map((n) => { const p = makePlanet(n, true); scene.add(p.g); return p; });
-  const orbs = worldBtns.map((b) => $('.world-orb', b));
+  // one planet behind each domain section of the work list
+  const domainSecs = $$('[data-space="planet"]');
+  const backdrops = domainSecs.map((el) => { const p = makePlanet(el.dataset.planet, true); scene.add(p.g); return { el, p }; });
 
   // the solar system behind About
   const solar = new THREE.Group(); scene.add(solar);
@@ -234,11 +192,10 @@ function start() {
   };
 
   /* ---------- Layout */
-  const stages = $$('[data-stage]');
-  const workSec = $('#work'), worldsEl = $('#worlds'), rail = $('#workRail'), expSec = $('#experience'), contactSec = $('#contact');
-  const shade = $('.shade');
-  const L = { bounds: [], workTop: 0, travel: 0, expTop: 0, expH: 1, descentFrom: 0, max: 1, slot: 300, pinned: motion };
-  if (!motion) root.classList.add('flat');
+  const sec = (k) => $(`[data-space="${k}"]`);
+  const heroSec = sec('bh'), sunSec = sec('sun'), workSec = sec('work'), expSec = sec('earth'), stackSec = sec('stack'), contactSec = sec('land');
+  const stops = [sunSec, workSec, expSec, stackSec, contactSec];
+  const L = { bounds: [], max: 1, descentFrom: 0, workTop: 0, workH: 1 };
 
   function layout() {
     S.W = innerWidth; S.H = innerHeight; S.mobile = S.W < 760;
@@ -247,83 +204,65 @@ function start() {
     cam.left = -S.W / 2; cam.right = S.W / 2; cam.top = S.H / 2; cam.bottom = -S.H / 2; cam.updateProjectionMatrix();
     rt.setSize(Math.max(2, Math.round(S.W * rtQ)), Math.max(2, Math.round(S.H * rtQ)));
     bhMat.uniforms.uRes.value.set(rt.width, rt.height);
-    bhMat.uniforms.uShift.value.set(S.mobile ? 0 : 0.2, S.mobile ? 0.17 : 0.09);
+    bhMat.uniforms.uShift.value.set(S.mobile ? 0 : 0.12, S.mobile ? 0.12 : 0.06);
     bhMat.uniforms.uZoom.value = S.W / S.H < 0.8 ? 1.25 : 2.1;
-    warpMat.uniforms.uRes.value.set(S.W, S.H); landMat.uniforms.uRes.value.set(S.W, S.H);
-    landMat.uniforms.uPadPos.value.set(S.mobile ? 0.5 : 0.72, S.mobile ? 0.17 : 0.1);
+    landMat.uniforms.uRes.value.set(S.W, S.H);
+    landMat.uniforms.uPadPos.value.set(S.mobile ? 0.86 : 0.86, S.mobile ? 0.27 : 0.32);
     smokeMat.uniforms.uDpr.value = dpr;
-
-    // projects track: one planet centred at a time, scrolled sideways
-    if (L.pinned) {
-      L.slot = S.mobile ? S.W * 0.8 : clamp(S.W * 0.3, 300, 470);
-      worldsEl.style.setProperty('--slot', `${L.slot}px`);
-      worldsEl.style.setProperty('--track-pad', `${(S.W - L.slot) / 2}px`);
-      $$('.world', worldsEl).forEach((w) => w.style.setProperty('--slot', `${L.slot}px`));
-      L.travel = L.slot * (ORDER.length - 1);
-      workSec.style.setProperty('--work-h', `${S.H + L.travel + S.H * 0.35}px`);
-    }
     const top = (el) => el.getBoundingClientRect().top + scrollY;
-    L.bounds = stages.slice(1).map(top);
-    L.workTop = top(workSec);
-    L.expTop = top(expSec); L.expH = expSec.offsetHeight;
+    L.bounds = stops.map(top);
+    L.workTop = top(workSec); L.workH = workSec.offsetHeight;
     L.max = document.documentElement.scrollHeight - S.H;
-    L.descentFrom = top(contactSec) - S.H * 0.55;
+    L.descentFrom = top(contactSec) - S.H * 0.5;
   }
   layout();
-  let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(layout, 120); });
+  let rz; const relayout = () => { clearTimeout(rz); rz = setTimeout(layout, 120); };
+  addEventListener('resize', relayout);
   if (document.fonts) document.fonts.ready.then(layout);
-  new ResizeObserver(() => { clearTimeout(rz); rz = setTimeout(layout, 120); }).observe($('#main'));
+  new ResizeObserver(relayout).observe(document.body);
 
   addEventListener('pointermove', (e) => { S.mx = e.clientX / S.W * 2 - 1; S.my = e.clientY / S.H * 2 - 1; }, { passive: true });
 
-  /* ---------- Intro: rushing stars settle, the black hole fades up, the name rises, the rocket arrives */
-  const intro = { on: motion && !SHOT && scrollY < 20 && !location.hash, t0: 0 };
-  if (!intro.on) landed();
+  // how much of the screen a section covers right now, 0..1
+  const cover = (el) => { const r = el.getBoundingClientRect(); return clamp((Math.min(r.bottom, S.H) - Math.max(r.top, 0)) / S.H); };
+  // 0 while a section is below the fold, 1 once its top reaches the top of the screen
+  const arrive = (el) => clamp(1 - el.getBoundingClientRect().top / S.H);
 
-  /* ---------- Rocket choreography: a target pose per stage, blended by scroll, then eased */
-  const R = { x: S.W * 0.82, y: S.H * 1.25, a: 30, sz: 1, pow: 0.6, z: 1500, init: false };
-  function stagePose(k, time, f) {
+  /* ---------- Intro: the black hole fades up while the particles gather into the name */
+  const intro = { on: motion && !SHOT && scrollY < 20, t0: 0 };
+
+  /* ---------- Rocket choreography: a pose per section, blended by scroll, then eased */
+  const R = { x: 0, y: 0, a: 30, sz: 1, pow: 0.6, z: 1500, init: false };
+  const rocketPx = () => (S.mobile ? 80 : 112);
+  function earthPose(t) {
+    const m = S.mobile, W = S.W, H = S.H;
+    const fx = m ? 0.72 : 0.74, fy = m ? 0.78 : 0.55, fr = m ? W * 0.42 : Math.min(W * 0.27, H * 0.4);
+    const z = easeIO(t);
+    return { x: mix(W * 0.86, W * fx, z), y: mix(H * 0.25, H * fy, z), r: fr * mix(0.05, 1, z) };
+  }
+  function pose(k, time) {
     const W = S.W, H = S.H, m = S.mobile;
-    if (k === 0) {
-      const bob = Math.sin(time * 1.3) * 0.008;
-      return { x: m ? 0.78 : 0.79, y: (m ? 0.47 : 0.66) + bob, a: 28 + Math.sin(time * 0.9) * 3, sz: 1, pow: 0.55, z: 1500 };
-    }
-    if (k === 1) return { x: m ? 0.82 : 0.6, y: m ? 0.14 : 0.2, a: 72 + Math.sin(time) * 3, sz: 0.85, pow: 0.75, z: 1500 };
+    if (k === 0) return { x: m ? 0.82 : 0.56, y: (m ? 0.52 : 0.6) + Math.sin(time * 1.3) * 0.008, a: 32 + Math.sin(time * 0.9) * 3, sz: 1, pow: 0.55, z: 1500 };
+    if (k === 1) return { x: m ? 0.84 : 0.6, y: m ? 0.15 : 0.2, a: 72 + Math.sin(time) * 3, sz: 0.85, pow: 0.75, z: 1500 };
     if (k === 2) {
-      // ride along the progress rail under the planets
-      const p = clamp((S.y - L.workTop) / Math.max(1, L.travel));
-      const rr = rail.parentElement.getBoundingClientRect();
-      return { x: (rr.left + 30 + p * (rr.width - 60)) / W, y: (rr.top - (m ? 16 : 20)) / H + Math.sin(time * 1.6) * 0.003, a: 90 + Math.sin(time * 1.1) * 3, sz: 0.5, pow: 0.75, z: 1500 };
+      const p = clamp((S.y - L.workTop) / Math.max(1, L.workH - S.H));
+      return { x: mix(0.06, 0.94, p), y: 0.955 + Math.sin(time * 1.6) * 0.003, a: 90 + Math.sin(time * 1.1) * 3, sz: 0.5, pow: 0.75, z: 1500 };
     }
     if (k === 3) {
-      const e = earthPose(1, 0);
-      const pe = clamp((S.y - L.expTop) / L.expH);
-      const ang = time * 0.35 + pe * 5.5;
+      const e = earthPose(1);
+      const ang = time * 0.35 + S.y * 0.0012;
       const rx = e.r * 1.45, ry = e.r * 0.42;
-      const x = e.x + Math.cos(ang) * rx, y = e.y + Math.sin(ang) * ry;
       const dx = -Math.sin(ang) * rx, dy = Math.cos(ang) * ry;
-      return { x: x / W, y: y / H, a: Math.atan2(dx, -dy) * 180 / Math.PI, sz: 0.62, pow: 0.6, z: Math.sin(ang) * e.r * 1.6 };
+      return { x: (e.x + Math.cos(ang) * rx) / W, y: (e.y + Math.sin(ang) * ry) / H, a: Math.atan2(dx, -dy) * 180 / Math.PI, sz: 0.6, pow: 0.6, z: Math.sin(ang) * e.r * 1.6 };
     }
+    if (k === 4) return { x: m ? 0.86 : 0.88, y: m ? 0.12 : 0.2, a: 120 + Math.sin(time) * 4, sz: 0.75, pow: 0.7, z: 1500 };
     // touchdown
     const d = clamp((S.y - L.descentFrom) / Math.max(1, L.max - L.descentFrom));
     const pad = landMat.uniforms.uPadPos.value;
-    const half = rocketPx() * 0.62 / H;
-    const ground = 1 - pad.y - half;
+    const ground = 1 - pad.y - rocketPx() * 0.62 / H;
     const e = easeOut(d);
-    const y = mix(0.06, ground, e);
     const pw = d < 0.8 ? 1 : d < 0.985 ? mix(1, 0.35, (d - 0.8) / 0.185) : 0;
-    return { x: pad.x + (1 - e) * 0.06, y, a: (1 - e) * -8, sz: 1, pow: pw, z: 1500, d };
-  }
-  const rocketPx = () => (S.mobile ? 86 : 118);
-
-  function earthPose(t23, t34) {
-    const m = S.mobile, W = S.W, H = S.H;
-    const fx = m ? 0.5 : 0.7, fy = m ? 0.9 : 0.56, fr = m ? W * 0.62 : Math.min(W * 0.29, H * 0.42);
-    const z = easeIO(t23);
-    let x = mix(W * 0.5, W * fx, z), y = mix(H * 0.42, H * fy, z), r = fr * mix(0.03, 1, z);
-    const g = easeIO(t34);
-    r *= 1 + g * 5; y += g * r * 0.75; x = mix(x, W * 0.5, g);
-    return { x, y, r };
+    return { x: pad.x + (1 - e) * 0.05, y: mix(0.05, ground, e), a: (1 - e) * -8, sz: 1, pow: pw, z: 1500, d };
   }
 
   /* ---------- Frame */
@@ -337,62 +276,47 @@ function start() {
     frames++;
     if (motion && !SHOT && frames > 30 && frames < 150) { if (dt > 0.034) slowFrames++; if (slowFrames > 50 && rtQ > 0.45) { rtQ = 0.42; bhMat.uniforms.uSteps.value = 140; layout(); } }
 
-    // where are we on the trip: 0 black hole, 1 sun, 2 worlds, 3 earth, 4 landing
     let s = 0;
     L.bounds.forEach((b) => { s += sstep(b - S.H * 0.92, b - S.H * 0.12, S.y); });
-    const w = [0, 1, 2, 3, 4].map((k) => clamp(1 - Math.abs(s - k)));
-    const seg = Math.min(3, Math.floor(s)), f = s - seg;
+    const seg = Math.min(4, Math.floor(s)), f = s - seg;
 
-    // intro clock
-    let iWarp = 0, iBH = 1, iRocket = 1;
+    let iBH = 1, iRocket = 1;
     if (intro.on) {
       if (!intro.t0) intro.t0 = now;
       const t = (now - intro.t0) / 1000;
-      iWarp = 1 - easeOut(clamp(t / 2.2)); iBH = sstep(0.8, 2.8, t); iRocket = sstep(2.2, 4.2, t);
-      if (t > 2.1 && !root.classList.contains('landed')) landed();
-      if (t > 4.4 || S.y > 40) { intro.on = false; landed(); }
+      iBH = sstep(0.6, 3, t); iRocket = sstep(2, 4, t);
+      if (t > 4.2 || S.y > 40) intro.on = false;
     }
 
-    // black hole
+    // black hole behind the name
     lookX += (S.mx - lookX) * 0.04; lookY += (S.my - lookY) * 0.04;
-    const bhA = w[0] * iBH;
-    bhBlit.visible = w[0] > 0.002;
+    const wBH = Math.pow(cover(heroSec), 1.3);
+    bhBlit.visible = wBH > 0.002;
     if (bhBlit.visible) {
-      bhMat.uniforms.uTime.value = time; bhMat.uniforms.uFade.value = 1; bhMat.uniforms.uLook.value.set(lookX, lookY);
+      bhMat.uniforms.uTime.value = time; bhMat.uniforms.uLook.value.set(lookX, lookY);
       renderer.setRenderTarget(rt); renderer.render(bhScene, cam); renderer.setRenderTarget(null);
-      bhBlit.material.uniforms.uA.value = bhA;
+      bhBlit.material.uniforms.uA.value = wBH * iBH;
     }
 
-    // stars and warp
-    const strength = [1, 0.5, 0.4, 0.25];
-    const bump = s < 4 ? Math.sin(Math.PI * f) * strength[seg] : 0;
-    warpMat.uniforms.uTime.value = time;
-    warpMat.uniforms.uWarp.value = clamp(Math.max(bump, iWarp));
-    warpMat.uniforms.uAlpha.value = clamp(Math.max(sstep(0, 0.5, s) * (1 - sstep(3.4, 3.95, s)), iWarp > 0.01 ? 1 : 0));
-    warpMat.uniforms.uTint.value.set(seg === 3 ? '#ffc58a' : '#9fd8ff');
-    warp.visible = warpMat.uniforms.uAlpha.value > 0.002;
-
-    // the sun and its planets
-    const w1 = w[1];
+    // the Sun behind "What I do"
+    const w1 = cover(sunSec);
     solar.visible = w1 > 0.002; sunGlow.visible = sunCorona.visible = solar.visible;
     if (solar.visible) {
-      const m = S.mobile, sr = m ? S.W * 0.16 : Math.min(S.W, S.H) * 0.11;
-      const drift = (s - 1) * S.H * 0.25;
-      const sp = px(m ? S.W * 0.72 : S.W * 0.8, (m ? S.H * 0.3 : S.H * 0.5) - drift);
-      solar.position.copy(sp); sun.scale.setScalar(sr * (0.7 + 0.3 * w1));
+      const m = S.mobile, sr = m ? S.W * 0.13 : Math.min(S.W, S.H) * 0.09;
+      const r = sunSec.getBoundingClientRect();
+      const sp = px(m ? S.W * 0.82 : S.W * 0.88, r.top + (m ? S.H * 0.14 : S.H * 0.2));
+      solar.position.copy(sp); sun.scale.setScalar(sr);
       sun.rotation.y = time * 0.03;
       sunMat.uniforms.uTime.value = time; sunMat.uniforms.uOpacity.value = w1;
-      sunGlow.position.copy(sp).setZ(-2000); sunGlow.scale.setScalar(sr * 9); sunGlow.material.uniforms.uAlpha.value = 0.55 * w1;
-      sunCorona.position.copy(sp); sunCorona.scale.setScalar(sr * 3.1); sunCorona.material.uniforms.uAlpha.value = 0.5 * w1;
+      sunGlow.position.copy(sp).setZ(-2000); sunGlow.scale.setScalar(sr * 9); sunGlow.material.uniforms.uAlpha.value = 0.5 * w1;
+      sunCorona.position.copy(sp); sunCorona.scale.setScalar(sr * 3.1); sunCorona.material.uniforms.uAlpha.value = 0.45 * w1;
       const span = m ? S.W * 1.3 : S.W * 0.9, first = sr * 1.9;
-      const scrollSpin = S.y * 0.0009;
       mini.forEach((o, i) => {
-        const r = first + (i / (ORDER.length - 1)) * (span - first);
-        o.line.scale.setScalar(r); o.line.material.opacity = 0.11 * w1;
-        const a = o.phase + time * o.speed * 0.25 + scrollSpin * o.speed * 6;
-        o.p.g.position.set(Math.cos(a) * r, Math.sin(a) * r, 0);
-        const size = (m ? 4 : 6) + o.p.d.size * (m ? 12 : 20);
-        o.p.g.scale.setScalar(size);
+        const rr = first + (i / (ORDER.length - 1)) * (span - first);
+        o.line.scale.setScalar(rr); o.line.material.opacity = 0.1 * w1;
+        const a = o.phase + time * o.speed * 0.25 + S.y * 0.0009 * o.speed * 6;
+        o.p.g.position.set(Math.cos(a) * rr, Math.sin(a) * rr, 0);
+        o.p.g.scale.setScalar((m ? 4 : 6) + o.p.d.size * (m ? 12 : 20));
         o.p.g.quaternion.copy(orbitPlane.quaternion).invert();
         o.p.g.getWorldPosition(tmp);
         o.p.mat.uniforms.uSun.value.copy(sp).sub(tmp).normalize();
@@ -402,34 +326,29 @@ function start() {
       });
     }
 
-    // the nine worlds
-    const w2 = w[2];
-    if (L.pinned) {
-      const p = clamp((S.y - L.workTop) / Math.max(1, L.travel));
-      worldsEl.style.transform = `translate3d(${(-p * L.travel).toFixed(1)}px,0,0)`;
-      rail.style.setProperty('--p', p.toFixed(4));
-    }
-    track.forEach((pl, i) => {
-      const r = orbs[i] && orbs[i].getBoundingClientRect();
-      if (r && L.pinned) { const dx = Math.abs(r.left + r.width / 2 - S.W / 2) / L.slot; worldBtns[i].style.setProperty('--focus', (1 - clamp(dx * (S.mobile ? 0.9 : 0.32), 0, 0.8)).toFixed(3)); }
-      const on = r && w2 > 0.002 && r.right > -r.width && r.left < S.W + r.width && r.bottom > -r.height && r.top < S.H + r.height;
-      if (!on) { pl.set(0); return; }
-      pl.hover += ((hoverWorld === i ? 1 : 0) - pl.hover) * 0.12;
-      const rad = (r.width / 2) * (1 + pl.hover * 0.06);
-      pl.g.position.copy(px(r.left + r.width / 2, r.top + r.height / 2));
-      pl.g.scale.setScalar(rad);
-      pl.body.rotation.y = time * 0.12 + i;
-      pl.mat.uniforms.uTime.value = time; pl.mat.uniforms.uHover.value = pl.hover;
-      pl.mat.uniforms.uSun.value.set(-0.75, 0.4, 0.55).normalize();
-      pl.set(w2);
+    // a planet rises behind each domain
+    backdrops.forEach(({ el, p }, i) => {
+      const r = el.getBoundingClientRect();
+      const vis = clamp(cover(el) * 1.6);
+      if (vis <= 0.002) { p.set(0); return; }
+      const m = S.mobile;
+      const rad = (m ? S.W * 0.5 : Math.min(S.H * 0.5, S.W * 0.3)) * (0.75 + 0.25 * p.d.size);
+      const rise = 1 - clamp(r.top / S.H);                 // drifts up as the section arrives
+      p.g.position.copy(px(m ? S.W * 0.95 : S.W * 0.93, r.top + S.H * (m ? 0.32 : 0.62) + (1 - rise) * S.H * 0.12));
+      p.g.scale.setScalar(rad);
+      p.body.rotation.y = time * 0.06 + i + S.y * 0.0003;
+      p.mat.uniforms.uTime.value = time;
+      p.mat.uniforms.uSun.value.set(-0.8, 0.35, 0.5).normalize();
+      p.set(vis * 0.6);
     });
 
-    // Earth
-    const t23 = seg === 2 ? f : s >= 3 ? 1 : 0, t34 = seg === 3 ? f : s >= 4 ? 1 : 0;
-    const eA = s < 2 ? 0 : s < 3 ? sstep(0, 0.35, f) : 1 - sstep(0.25, 0.7, t34);
-    earth.set(eA); moon.set(eA * (1 - t34)); earthGlow.visible = eA > 0.002;
+    // Earth behind Experience
+    const eA = clamp(cover(expSec) * 1.5);
+    earth.set(eA); moon.set(eA); earthGlow.visible = eA > 0.002;
     if (eA > 0.002) {
-      const e = earthPose(t23, t34);
+      const e = earthPose(sstep(0.05, 0.95, arrive(expSec)));
+      const lift = Math.max(0, -expSec.getBoundingClientRect().top) * 0.35;  // drifts away as you leave
+      e.y -= lift;
       earth.g.position.copy(px(e.x, e.y)); earth.g.scale.setScalar(e.r);
       earth.g.rotation.z = 0.41;
       earth.body.rotation.y = time * 0.04 + S.y * 0.0004;
@@ -441,21 +360,18 @@ function start() {
       moon.mat.uniforms.uSun.value.copy(earth.mat.uniforms.uSun.value);
     }
 
-    // landing sky
-    const w4 = s < 3 ? 0 : sstep(0.3, 0.8, t34);
+    // aurora landing site behind Contact and the footer
+    const w4 = sstep(0.1, 0.75, arrive(contactSec));
     landing.visible = w4 > 0.002;
     landMat.uniforms.uAlpha.value = w4; landMat.uniforms.uTime.value = time;
 
     // rocket
-    const A = stagePose(seg, time), B = stagePose(Math.min(4, seg + 1), time);
-    const k = s >= 4 ? 1 : easeIO(f);
-    const T = s >= 4 ? stagePose(4, time) : {
-      x: mix(A.x, B.x, k), y: mix(A.y, B.y, k), a: mixAngle(A.a, B.a, k), sz: mix(A.sz, B.sz, k),
-      pow: Math.max(mix(A.pow, B.pow, k), bump > 0.1 ? 0.6 + bump * 0.4 : 0), z: mix(A.z, B.z, clamp(k * 4)),
-    };
-    if (seg === 3 && s < 4) T.pow = mix(A.pow, B.pow, k);
+    const A = pose(seg, time), B = pose(Math.min(5, seg + 1), time);
+    const k = s >= 5 ? 1 : easeIO(f);
+    const T = s >= 5 ? pose(5, time) : { x: mix(A.x, B.x, k), y: mix(A.y, B.y, k), a: mixAngle(A.a, B.a, k), sz: mix(A.sz, B.sz, k), pow: mix(A.pow, B.pow, k), z: mix(A.z, B.z, clamp(k * 4)) };
+    if (seg === 2 && f > 0) T.z = mix(A.z, B.z, clamp((k - 0.75) * 4));
     let tx = T.x * S.W, ty = T.y * S.H;
-    if (intro.on || iRocket < 1) { const e = easeOut(iRocket); tx = mix(S.W * 1.15, tx, e); ty = mix(S.H * 1.25, ty, e); }
+    if (iRocket < 1) { const e = easeOut(iRocket); tx = mix(S.W * 1.15, tx, e); ty = mix(S.H * 1.25, ty, e); }
     const kk = motion && !SHOT ? 1 - Math.exp(-dt * 5.5) : 1;
     if (!R.init) { R.x = tx; R.y = ty; R.a = T.a; R.sz = T.sz; R.pow = T.pow; R.z = T.z; R.init = true; }
     R.x += (tx - R.x) * kk; R.y += (ty - R.y) * kk; R.a = mixAngle(R.a, T.a, kk); R.sz += (T.sz - R.sz) * kk; R.z += (T.z - R.z) * kk;
@@ -466,16 +382,15 @@ function start() {
     rocket.rotation.set(0, 0, -R.a * Math.PI / 180);
     bodyG.rotation.y = time * 0.5;
     const flick = 1 + Math.sin(time * 40) * 0.06 + Math.sin(time * 23) * 0.05;
-    flame.scale.set(1 + R.pow * 0.2, (0.15 + R.pow * 0.85) * flick * (1 + bump * 0.8), 1 + R.pow * 0.2);
+    flame.scale.set(1 + R.pow * 0.2, (0.15 + R.pow * 0.85) * flick, 1 + R.pow * 0.2);
     flameMat.uniforms.uTime.value = time; flameMat.uniforms.uPower.value = clamp(R.pow * 1.4);
-    flame.visible = R.pow > 0.02;
+    flame.visible = flameGlow.visible = R.pow > 0.02;
     flameGlow.scale.setScalar(0.9 + R.pow * 0.9); flameGlow.material.uniforms.uAlpha.value = R.pow * 0.9;
-    flameGlow.visible = flame.visible;
 
     // touchdown: the pad brightens, dust kicks up, the engine cuts
-    const pose4 = s > 3.3 ? stagePose(4, time) : null;
-    landMat.uniforms.uPad.value = pose4 ? clamp(pose4.d * 1.4) * w4 : 0;
-    if (pose4 && w4 > 0.5 && motion) {
+    const p5 = s > 4.3 ? pose(5, time) : null;
+    landMat.uniforms.uPad.value = p5 ? clamp(p5.d * 1.4) * w4 : 0;
+    if (p5 && w4 > 0.5 && motion) {
       const groundY = (1 - landMat.uniforms.uPadPos.value.y) * S.H;
       const alt = groundY - (R.y + size * 0.62);
       if (R.pow > 0.08 && alt < S.H * 0.22) emit(R.x - S.W / 2, S.H / 2 - groundY + 4, 1 - alt / (S.H * 0.22), alt < S.H * 0.05 ? 3 : 1);
@@ -493,11 +408,7 @@ function start() {
     smoke.visible = anySmoke && w4 > 0.01;
     if (smoke.visible) { smokeGeo.attributes.position.needsUpdate = true; smokeGeo.attributes.aAge.needsUpdate = true; smokeGeo.attributes.aSize.needsUpdate = true; }
 
-    // copy readability
-    shade.style.setProperty('--shade', clamp(w[1] * 0.9 + w[3] * 1 + w[4] * 0.7).toFixed(3));
-
     renderer.render(scene, cam);
-    root.dataset.stage = String(Math.round(s));
   }
 
   if (motion && !SHOT) {
@@ -508,7 +419,6 @@ function start() {
     const draw = () => { q = false; frame(performance.now()); };
     const ask = () => { if (!q) { q = true; requestAnimationFrame(draw); } };
     addEventListener('scroll', ask, { passive: true }); addEventListener('resize', ask);
-    worldBtns.forEach((b) => { b.addEventListener('pointerenter', ask); b.addEventListener('pointerleave', ask); });
     ask(); setTimeout(ask, 300);
   }
   window.__space = { S, L, renderer, draw: () => frame(performance.now()) };

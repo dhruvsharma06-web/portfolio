@@ -2,12 +2,11 @@
 
 Static site (HTML, CSS, JavaScript). No build step. three.js is vendored in `/vendor`.
 
-- `index.html` — home: a scroll journey from a black hole, past the Sun and nine planets (one per project field), down to Earth and a rocket landing under the aurora
-- `space.js` + `js/shaders.js` — the WebGL scene: ray-traced black hole, star warp, planets, Earth, landing site and the rocket
-- `space.css` — home page layout
+- `index.html` — home: name, statement, work by domain, experience, tech stack, contact
+- `space.js` + `js/shaders.js` — space backgrounds over the particle film: ray-traced black hole, the Sun, a planet per domain, Earth, the aurora landing site, and a rocket that follows the scroll
 - `about.html` — education, current research, how I work
-- `core.js` — shared motion: particle film on the about page, cursor, reveals, page transitions
-- `main.js` — tech stack hover, copy email, stat counters
+- `core.js` — shared motion: scroll-driven particle film (starry name), cursor, kinetic titles, intro, page transitions
+- `main.js` — home page interactions: scene transitions, glass cards, tech stack, copy email
 - `404.html` — custom not-found page; `Dhruv_Sharma_Resume.pdf` — résumé download
 - `media/og.jpg` — link preview image for LinkedIn, WhatsApp and X
 
