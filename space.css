@@ -85,7 +85,7 @@ html:has(.sheet[open]) { overflow: hidden; }
 .const { position: relative; padding: 14px 16px 6px; border-radius: 20px; background: radial-gradient(120% 100% at 50% 0%, rgba(120,140,255,.07), transparent 70%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); transition: box-shadow 300ms ease, background-color 300ms ease; }
 .const-name { display: flex; justify-content: space-between; align-items: baseline; font: 600 .8125rem "Text"; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
 .const-name b { font: 900 1.25rem "Display"; letter-spacing: -.02em; color: rgba(255,255,255,.25); }
-.const-field { position: relative; height: clamp(150px, 21svh, 210px); }
+.const-field { position: relative; height: clamp(170px, 24svh, 240px); }
 .const-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .const-lines polyline { fill: none; stroke: rgba(170,190,255,.35); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 3 4; transition: stroke 300ms ease; }
 .const-field ul { position: absolute; inset: 0; }
@@ -111,3 +111,46 @@ html:has(.sheet[open]) { overflow: hidden; }
 html:has(dialog[open]) .cursor, html:has(dialog[open]) .cursor-dot { opacity: 0 !important; }
 html.has-cursor:has(dialog[open]) dialog, html.has-cursor:has(dialog[open]) dialog * { cursor: auto !important; }
 html.has-cursor:has(dialog[open]) dialog a, html.has-cursor:has(dialog[open]) dialog button { cursor: pointer !important; }
+
+/* ---------- What I do: three stops on one orbit, sensor to server to screen */
+.page-home .statement-pin { justify-content: center; gap: clamp(18px, 3vh, 34px); padding-top: 90px; padding-bottom: 40px; }
+.st-head { font-size: clamp(2.4rem, 5.2vw, 5.4rem); line-height: .92; letter-spacing: -.05em; max-width: 16ch; }
+.st-orbits { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 48px); padding-top: 54px; max-width: 1180px; }
+.st-orbits::before { content: ""; position: absolute; left: -4%; right: -4%; top: 0; height: 120px; border-top: 1px solid rgba(255,255,255,.22); border-radius: 50% 50% 0 0 / 100% 100% 0 0; pointer-events: none; }
+.st-orbit { position: relative; display: grid; gap: 8px; align-content: start; }
+.st-planet { position: absolute; top: -54px; left: 0; width: 22px; height: 22px; border-radius: 50%; transform: translateY(-50%);
+  background: radial-gradient(circle at 35% 30%, #fff, var(--c) 45%, color-mix(in srgb, var(--c) 30%, #000) 100%); box-shadow: 0 0 18px 2px color-mix(in srgb, var(--c) 60%, transparent); }
+.st-orbit:nth-child(1) .st-planet { top: -30px; }
+.st-orbit:nth-child(2) .st-planet { top: -56px; width: 26px; height: 26px; }
+.st-orbit:nth-child(3) .st-planet { top: -36px; width: 18px; height: 18px; }
+.motion .st-planet { animation: bob 5s ease-in-out infinite alternate; }
+.st-orbit:nth-child(2) .st-planet { animation-delay: -1.6s; } .st-orbit:nth-child(3) .st-planet { animation-delay: -3.1s; }
+@keyframes bob { to { transform: translateY(calc(-50% - 6px)); } }
+.st-no { font: 600 .875rem "Text"; letter-spacing: .16em; text-transform: uppercase; color: var(--c); }
+.st-line { font-size: clamp(1.0625rem, 1.3vw, 1.3rem); font-weight: 600; line-height: 1.4; letter-spacing: -.01em; color: #e6e6ee; max-width: 30ch; }
+.st-tech { font-size: .9375rem; font-weight: 600; color: var(--ink-3); }
+.page-home .statement .stat-row { gap: 10px 48px; }
+.page-home .statement .stat-row b { font-size: clamp(2.25rem, 3.6vw, 3.5rem); }
+@media (max-width: 899px) {
+  .st-orbits { grid-template-columns: 1fr; padding: 0 0 0 34px; gap: 22px; }
+  .st-orbits::before { left: 10px; right: auto; top: 6px; bottom: 6px; width: 1px; height: auto; border: 0; background: rgba(255,255,255,.2); border-radius: 0; }
+  .st-planet, .st-orbit:nth-child(n) .st-planet { top: 4px; left: -34px; transform: none; }
+  @keyframes bob { to { transform: translateY(-4px); } }
+}
+
+/* star chart v2: real constellations, solid lines, stars graded by brightness */
+.const { background: radial-gradient(90% 80% at 50% 45%, rgba(90,110,220,.09), transparent 75%); }
+.const-name em { font: 500 italic .8125rem "Text"; letter-spacing: .04em; text-transform: none; color: rgba(190,205,255,.45); }
+.const-lines line { stroke: rgba(170,195,255,.32); stroke-width: 1; vector-effect: non-scaling-stroke; transition: stroke 300ms ease; }
+.const:hover .const-lines line { stroke: rgba(205,220,255,.8); }
+.sky .skill { gap: 7px; }
+.sky .skill i { position: relative; width: 4px; height: 4px; background: #fff; border-radius: 50%; box-shadow: 0 0 4px 1px rgba(200,215,255,.8), 0 0 12px 2px rgba(140,160,255,.35); }
+.sky .skill.m1 i { width: 5px; height: 5px; }
+.sky .skill.m2 i { width: 7px; height: 7px; box-shadow: 0 0 6px 2px rgba(225,235,255,.9), 0 0 20px 5px rgba(150,175,255,.4); }
+.sky .skill.m3 i { width: 9px; height: 9px; box-shadow: 0 0 8px 3px rgba(255,244,220,.95), 0 0 30px 8px rgba(255,200,140,.4); }
+/* diffraction spikes on the bright ones, like a real photo of the sky */
+.sky .skill.m2 i::before, .sky .skill.m2 i::after, .sky .skill.m3 i::before, .sky .skill.m3 i::after { content: ""; position: absolute; left: 50%; top: 50%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent); transform: translate(-50%, -50%); }
+.sky .skill.m2 i::before { width: 26px; height: 1px; } .sky .skill.m2 i::after { width: 1px; height: 26px; background: linear-gradient(transparent, rgba(255,255,255,.75), transparent); }
+.sky .skill.m3 i::before { width: 40px; height: 1px; } .sky .skill.m3 i::after { width: 1px; height: 40px; background: linear-gradient(transparent, rgba(255,255,255,.8), transparent); }
+.sky .skill span { font-size: .8125rem; }
+.sky .skill:hover i, .sky .skill.on i { transform: scale(1.6); }

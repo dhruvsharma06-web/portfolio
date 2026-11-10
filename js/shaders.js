@@ -39,6 +39,26 @@ vec3 starsDir(vec3 d) {
 }
 `;
 
+/* Deep-sky backdrop: the same stars as around the black hole, turning slowly with scroll */
+export const STARFIELD_FS = /* glsl */`
+precision highp float;
+varying vec2 vUv;
+uniform vec2 uRes; uniform float uTime; uniform float uAlpha; uniform float uTurn;
+${NOISE}
+${STARS}
+void main() {
+  vec2 uv = (vUv - .5) * vec2(uRes.x / uRes.y, 1.);
+  float a = uTurn, b = .35 + uTurn * .3;
+  vec3 d = normalize(vec3(uv, 1.6));
+  d.xz = mat2(cos(a), -sin(a), sin(a), cos(a)) * d.xz;
+  d.yz = mat2(cos(b), -sin(b), sin(b), cos(b)) * d.yz;
+  vec3 c = starsDir(d);
+  // gentle twinkle
+  c *= .85 + .15 * sin(uTime * 2. + hash12(floor(vUv * uRes / 3.)) * 40.);
+  gl_FragColor = vec4(c * uAlpha, 1.);
+}
+`;
+
 /* Gargantua: ray-traced Schwarzschild lensing of a thin accretion disk (units where rs = 1). */
 export const BLACKHOLE_FS = /* glsl */`
 precision highp float;
@@ -164,20 +184,51 @@ void main() {
     float lat = p.y + fbm3(p * 2.5 + vec3(uTime * .02, 0., uSeed)) * .18;
     float b = sin(lat * 18. + uSeed) * .5 + .5;
     c = mix(uA, uB, b); c = mix(c, uC, smoothstep(.55, .9, fbm3(p * 5. + uSeed)) * .5);
-  } else if (uKind < 2.5) {         // earth
-    float land = fbm3(p * 2.2 + 4.1) + fbm3(p * 6. + 1.3) * .25;
-    float isLand = smoothstep(.56, .6, land);
-    float ice = smoothstep(.78, .86, abs(p.y));
-    vec3 ocean = mix(vec3(.02, .08, .22), vec3(.03, .2, .42), fbm3(p * 4.));
-    vec3 ground = mix(vec3(.12, .3, .1), vec3(.45, .38, .22), smoothstep(.6, .85, land));
-    c = mix(ocean, ground, isLand); c = mix(c, vec3(.92), ice);
-    spec = (1. - isLand) * (1. - ice);
-    float cl = smoothstep(.5, .78, fbm3(p * 3.4 + vec3(uTime * .015, 0., 0.)) + fbm3(p * 9.) * .2);
-    c = mix(c, vec3(1.), cl * .85);
-    // city lights on the night side
-    float night = smoothstep(.05, -.2, dot(normalize(vN), normalize(uSun)));
-    float cities = isLand * (1. - ice) * step(.86, hash13(floor(p * 160.))) * (1. - cl) * smoothstep(.45, .7, vnoise3(p * 9.));
-    c += vec3(1., .72, .38) * cities * night * uNight * 1.1;
+  } else if (uKind < 2.5) {         // earth: warped continents, biomes, clouds with shadows, night lights
+    vec3 n0 = normalize(vN), L = normalize(uSun), v0 = vec3(0., 0., 1.);
+    vec3 q = p * 1.5 + vec3(fbm3(p * 2.1 + 1.7), fbm3(p * 2.1 + 9.2), fbm3(p * 2.1 + 4.4)) * 1.1;
+    float land = fbm3(q * 1.6 + 4.1) * .8 + fbm3(p * 9. + 2.) * .2;
+    float coast = .53;
+    float isLand = smoothstep(coast, coast + .012, land);
+    float lat = abs(p.y);
+    float hgt = clamp((land - coast) / .25, 0., 1.);
+    float dry = smoothstep(.12, .3, lat) * smoothstep(.45, .3, lat) * smoothstep(.35, .6, fbm3(p * 4. + 7.));
+    vec3 forest = mix(vec3(.05, .16, .05), vec3(.12, .24, .08), fbm3(p * 14.));
+    vec3 desert = mix(vec3(.55, .44, .27), vec3(.68, .55, .36), fbm3(p * 18.));
+    vec3 tundra = vec3(.36, .33, .26);
+    vec3 ground = mix(forest, desert, dry);
+    ground = mix(ground, tundra, smoothstep(.55, .72, lat));
+    ground = mix(ground, vec3(.42, .38, .34), smoothstep(.55, .9, hgt) * .6);            // mountains
+    float shallow = smoothstep(coast - .07, coast, land);
+    vec3 ocean = mix(vec3(.01, .05, .16), vec3(.02, .16, .3), shallow);
+    ocean = mix(ocean, vec3(.05, .3, .38), shallow * shallow * .6);
+    float ice = smoothstep(.8, .88, lat + fbm3(p * 6.) * .08);
+    c = mix(ocean, ground, isLand); c = mix(c, vec3(.9, .93, .96), ice);
+    // clouds drift on their own, with a faint shadow underneath
+    float ct = uTime * .012; mat2 rc = mat2(cos(ct), -sin(ct), sin(ct), cos(ct));
+    vec3 pc = vec3(rc * p.xz, p.y).xzy;
+    vec3 wc = pc * 2.6 + vec3(fbm3(pc * 3. + 5.), fbm3(pc * 3. + 1.), 0.) * .9;
+    float cloud = smoothstep(.5, .78, fbm3(wc) * .8 + fbm3(pc * 11.) * .25);
+    cloud *= 1. - smoothstep(.85, .97, lat) * .5;
+    float shade = smoothstep(.5, .78, fbm3(wc + L * .03) * .8 + fbm3(pc * 11.) * .25);
+    float day = clamp(dot(n0, L), 0., 1.);
+    float term = smoothstep(-.12, .25, dot(n0, L));
+    vec3 lit = c * (1. - shade * .35) * (.02 + day * 1.15);
+    // ocean glint
+    vec3 hv = normalize(L + v0);
+    lit += vec3(1., .92, .8) * pow(max(dot(n0, hv), 0.), 60.) * (1. - isLand) * (1. - ice) * (1. - cloud) * .9 * term;
+    // twilight band
+    lit += vec3(1., .45, .15) * exp(-pow(dot(n0, L) * 6., 2.)) * .12;
+    vec3 col = mix(lit, vec3(1.) * (.03 + day * 1.1), cloud * .92);
+    // night side city lights
+    float night = 1. - smoothstep(-.18, .05, dot(n0, L));
+    float cities = isLand * (1. - ice) * (1. - cloud) * smoothstep(.62, .8, vnoise3(p * 40.)) * smoothstep(.45, .65, fbm3(p * 6. + 3.));
+    col += vec3(1., .7, .35) * cities * night * uNight * 1.4;
+    // thin blue limb hugging the day side
+    float mu = clamp(dot(n0, v0), 0., 1.);
+    col += vec3(.35, .6, 1.) * pow(1. - mu, 3.5) * (.25 + term * .9) + vec3(.5, .7, 1.) * uHover * pow(1. - mu, 3.) * .5;
+    gl_FragColor = vec4(col, uOpacity);
+    return;
   } else {                          // ice giant
     float b = fbm3(p * vec3(1., 6., 1.) + uSeed);
     c = mix(uA, uB, b);
@@ -201,13 +252,14 @@ varying vec3 vN; varying vec3 vP; varying vec3 vW;
 uniform vec3 uColor; uniform vec3 uSun; uniform float uOpacity;
 void main() {
   vec3 v = vec3(0., 0., 1.);
-  float rim = pow(1. - clamp(dot(normalize(vN), v), 0., 1.), 2.4);
-  float lit = clamp(dot(normalize(vN), normalize(uSun)) * .6 + .5, 0., 1.);
-  gl_FragColor = vec4(uColor * rim * lit * 1.6 * uOpacity, 1.);
+  float mu = clamp(dot(normalize(vN), v), 0., 1.);
+  float rim = pow(1. - mu, 5.) * smoothstep(0., .25, mu);
+  float lit = clamp(dot(normalize(vN), normalize(uSun)) * .7 + .35, 0., 1.);
+  gl_FragColor = vec4(uColor * rim * lit * 2.2 * uOpacity, 1.);
 }
 `;
 
-/* Sun surface */
+/* Sun surface: boiling granulation, darker limb, slow sunspots */
 export const SUN_FS = /* glsl */`
 precision highp float;
 varying vec3 vN; varying vec3 vP; varying vec3 vW;
@@ -215,12 +267,18 @@ uniform float uTime; uniform float uOpacity;
 ${NOISE}
 void main() {
   vec3 p = normalize(vP);
-  float n = fbm3(p * 4. + vec3(0., uTime * .08, 0.)) * .6 + fbm3(p * 14. - uTime * .1) * .4;
-  vec3 c = mix(vec3(1., .45, .08), vec3(1., .92, .6), n);
-  vec3 v = vec3(0., 0., 1.);
-  float rim = pow(1. - clamp(dot(normalize(vN), v), 0., 1.), 2.);
-  c += vec3(1., .5, .1) * rim;
-  gl_FragColor = vec4(c * uOpacity, uOpacity);
+  float t = uTime * .06;
+  float gran = fbm3(p * 22. + vec3(t * 2., -t, t)) ;                         // small convection cells
+  float cells = 1. - abs(fbm3(p * 9. - vec3(0., t, 0.)) * 2. - 1.);           // brighter cell walls
+  float flow = fbm3(p * 3. + vec3(t * .5, 0., -t * .3));
+  float spots = smoothstep(.72, .8, fbm3(p * 4. + 11.)) * .55;
+  float heat = gran * .55 + cells * .35 + flow * .3 - spots;
+  vec3 c = mix(vec3(.95, .32, .04), vec3(1., .72, .28), smoothstep(.25, .75, heat));
+  c = mix(c, vec3(1., .95, .78), smoothstep(.7, .95, heat));
+  float mu = clamp(dot(normalize(vN), vec3(0., 0., 1.)), 0., 1.);
+  c *= .45 + .55 * pow(mu, .45);                                              // limb darkening
+  c += vec3(1., .45, .1) * pow(1. - mu, 3.) * .9;                             // hot rim
+  gl_FragColor = vec4(c * 1.15 * uOpacity, uOpacity);
 }
 `;
 
@@ -293,15 +351,23 @@ varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * model
 `;
 export const FLAME_FS = /* glsl */`
 precision highp float;
-varying vec2 vUv; uniform float uTime; uniform float uPower;
+varying vec2 vUv; uniform float uTime; uniform float uPower; uniform float uCore;
 ${NOISE}
 void main() {
-  float y = vUv.y;                                          // 0 at nozzle (top of cone geometry flipped)
-  float n = vnoise(vec2(vUv.x * 8., y * 6. - uTime * 14.));
-  float core = smoothstep(1., .0, y + n * .25);
-  vec3 c = mix(vec3(1., .35, .08), vec3(1., .95, .75), core);
-  c = mix(c, vec3(.45, .7, 1.), smoothstep(.05, 0., y) * .6);
-  float a = core * uPower;
+  float y = vUv.y;                                          // 0 at the nozzle, 1 at the tip
+  float n = vnoise(vec2(vUv.x * 8., y * 6. - uTime * 16.));
+  if (uCore > .5) {
+    // hot blue-white core with shock diamonds
+    float diam = .55 + .45 * pow(abs(sin(y * 26. - uTime * 2.)), 3.);
+    float core = smoothstep(.75, .0, y + n * .1) * diam;
+    vec3 c = mix(vec3(.55, .78, 1.), vec3(1.), smoothstep(.4, .0, y));
+    float a = core * uPower;
+    gl_FragColor = vec4(c * a * 1.3, a);
+    return;
+  }
+  float body = smoothstep(1., .0, y + n * .3) * (.75 + .25 * n);
+  vec3 c = mix(vec3(1., .3, .06), vec3(1., .78, .4), smoothstep(.7, .1, y));
+  float a = body * uPower;
   gl_FragColor = vec4(c * a, a);
 }
 `;
@@ -349,19 +415,26 @@ void main() {
 }
 `;
 
-/* Sunlight: soft rays fanning out of the Sun, turning slowly */
+/* Corona: streamers of plasma flowing outward, brightest at the limb */
 export const RAYS_FS = /* glsl */`
 precision highp float;
 varying vec2 vUv; uniform float uTime; uniform float uAlpha;
 ${NOISE}
 void main() {
   vec2 p = vUv - .5; float r = length(p) * 2.; float a = atan(p.y, p.x);
-  float rays = fbm(vec2(a * 3.2 + uTime * .03, uTime * .05)) * .7 + fbm(vec2(a * 9. - uTime * .05, 3.)) * .5;
-  rays = pow(rays, 2.2) * 2.4;
-  float fall = smoothstep(1., .18, r) * smoothstep(.1, .24, r);
-  vec3 c = mix(vec3(1., .55, .18), vec3(1., .9, .65), smoothstep(.6, .2, r));
-  float core = pow(clamp(1. - r, 0., 1.), 3.) * .6;
-  gl_FragColor = vec4(c * (rays * fall + core) * uAlpha, 1.);
+  vec2 ca = vec2(cos(a), sin(a));
+  float rs = .2667;                                                // the Sun's edge in this quad (radius / quad half-size)
+  float h = max(r - rs, 0.);
+  // streamers: angular noise that drifts outward over time
+  float s1 = fbm(ca * 2.4 + vec2(h * 2. - uTime * .07, uTime * .01));
+  float s2 = fbm(ca * 7. + vec2(h * 5. - uTime * .12, 4.));
+  float streak = pow(s1, 2.) * 1.6 + pow(s2, 3.) * 1.4;
+  float fall = exp(-h * 5.5) * smoothstep(rs * .92, rs * 1.02, r);
+  float halo = exp(-h * 14.) * .9 * smoothstep(rs * .9, rs * 1.01, r);
+  float far = exp(-h * 2.2) * .12;
+  vec3 c = mix(vec3(1., .5, .16), vec3(1., .86, .6), exp(-h * 9.));
+  float edge = smoothstep(1., .7, r);                              // fade out well before the quad's border
+  gl_FragColor = vec4(c * (streak * fall + halo + far) * edge * uAlpha, 1.);
 }
 `;
 
@@ -376,8 +449,8 @@ varying float vAge; uniform float uAlpha;
 void main() {
   if (vAge <= 0. || vAge >= 1.) discard;
   float d = length(gl_PointCoord - .5) * 2.;
-  float a = smoothstep(1., 0., d) * smoothstep(0., .1, vAge) * (1. - vAge);
-  vec3 c = mix(vec3(1., .95, .7), vec3(1., .42, .12), vAge);
+  float a = pow(smoothstep(1., 0., d), 2.) * smoothstep(0., .15, vAge) * pow(1. - vAge, 1.6) * .8;
+  vec3 c = mix(vec3(1., .9, .66), vec3(1., .36, .08), smoothstep(0., .7, vAge));
   gl_FragColor = vec4(c * a * uAlpha, 1.);
 }
 `;

@@ -92,13 +92,33 @@
     <p class="scroll-cue" aria-hidden="true"><span>Scroll</span><i></i></p>
   </section>
 
-  <!-- STATEMENT -->
-  <section class="statement" data-page data-scene aria-labelledby="st-title" data-stage="terrain" data-chapter="What I do" data-space="sun">
+  <!-- STATEMENT: sensor to screen, as three orbits around the Sun -->
+  <section class="statement" data-page data-scene aria-labelledby="st-title" data-stage="stars" data-chapter="What I do" data-space="sun">
     <div class="statement-pin">
-      <h2 id="st-title" class="kicker-h">What I do</h2>
-      <p class="statement-text">I build apps, the backends behind them, and the hardware they talk to. Mostly Flutter, Python and Java, with an ESP32 or an AI model when the problem needs one.</p>
-      <ul class="stat-row" data-rise>
-        <li><b data-count="14">14</b> projects</li><li><b data-count="9">9</b> domains</li><li><b data-count="4">4</b> live deployments</li><li><b data-count="2">2</b> research internships</li>
+      <p class="kicker-h">What I do</p>
+      <h2 id="st-title" class="st-head">I build the whole thing, from the sensor to the screen.</h2>
+      <ol class="st-orbits">
+        <li class="st-orbit" style="--c:#ffb36b">
+          <span class="st-planet" aria-hidden="true"></span>
+          <p class="st-no">01 · Hardware</p>
+          <p class="st-line">ESP32 boards and sensors that read the real world: motion, muscle signals, air, water and soil.</p>
+          <p class="st-tech">ESP32 · Sensors · MQTT · Embedded C</p>
+        </li>
+        <li class="st-orbit" style="--c:#8fd0ff">
+          <span class="st-planet" aria-hidden="true"></span>
+          <p class="st-no">02 · Backend</p>
+          <p class="st-line">Servers that collect that data, store it and make sense of it, with an AI model when the problem needs one.</p>
+          <p class="st-tech">FastAPI · Flask · Java · Firebase · YOLO</p>
+        </li>
+        <li class="st-orbit" style="--c:#c9a7ff">
+          <span class="st-planet" aria-hidden="true"></span>
+          <p class="st-no">03 · Apps</p>
+          <p class="st-line">The screens people actually use, on their phones and on the web.</p>
+          <p class="st-tech">Flutter · Next.js · React · three.js</p>
+        </li>
+      </ol>
+      <ul class="stat-row">
+        <li><b data-count="14">14</b> projects</li><li><b data-count="9">9</b> fields</li><li><b data-count="4">4</b> live sites</li><li><b data-count="2">2</b> research internships</li>
       </ul>
     </div>
   </section>
@@ -225,56 +245,56 @@
   <section class="toolkit" data-page id="toolkit" data-scene aria-labelledby="tk-title" data-stage="stars" data-chapter="Tech stack" data-space="stack">
     <div class="tk-head">
       <h2 id="tk-title" class="h2" data-kinetic>Tech stack</h2>
-      <p class="sub" data-rise style="--i:1">A star chart of what I build with. Brighter stars show up in more projects. <span class="fine-only-inline">Hover</span><span class="touch-only-inline">Tap</span> one to see where.</p>
+      <p class="sub" data-rise style="--i:1">My stack as a star chart. Each group is a real constellation, and brighter stars show up in more projects. <span class="fine-only-inline">Hover</span><span class="touch-only-inline">Tap</span> one to see where.</p>
     </div>
     <div class="sky" id="sky">
       <div class="const" data-rise style="--i:0">
-        <p class="const-name"><span>Languages</span><b>7</b></p>
+        <p class="const-name"><span>Languages</span><em>Ursa Major</em></p>
         <div class="const-field">
-          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="12.0,18.9 24.7,52.5 37.3,78.4 50.0,23.2 62.7,53.5 75.3,74.8 88.0,16.2"/></svg>
-          <ul><li style="left:12.0%;top:18.9%;--n:0;--tw:4.54s"><button class="skill star" type="button" data-used="SkillConnect"><i aria-hidden="true"></i><span>Java</span></button></li><li style="left:24.7%;top:52.5%;--n:1;--tw:2.93s"><button class="skill star big" type="button" data-used="OrbitGuard, EV Twin, SmartSpray"><i aria-hidden="true"></i><span>Python</span></button></li><li style="left:37.3%;top:78.4%;--n:2;--tw:2.86s"><button class="skill star big" type="button" data-used="HemoPhysio, SmartSpray, Pluto Drone Verifier"><i aria-hidden="true"></i><span>Dart</span></button></li><li style="left:50.0%;top:23.2%;--n:3;--tw:4.99s"><button class="skill star big" type="button" data-used="Fieldwise, Silicon Atlas, Solar Gesture Explorer"><i aria-hidden="true"></i><span>JavaScript</span></button></li><li style="left:62.7%;top:53.5%;--n:4;--tw:3.52s"><button class="skill star" type="button" data-used="Kosh"><i aria-hidden="true"></i><span>TypeScript</span></button></li><li style="left:75.3%;top:74.8%;--n:5;--tw:4.54s"><button class="skill star" type="button" data-used=""><i aria-hidden="true"></i><span>C</span></button></li><li style="left:88.0%;top:16.2%;--n:6;--tw:3.53s"><button class="skill star" type="button" data-used="SkillConnect, WelfareWatch"><i aria-hidden="true"></i><span>SQL</span></button></li></ul>
+          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="11.6" y1="14.4" x2="26.0" y2="28.8"/><line x1="26.0" y1="28.8" x2="38.8" y2="36.8"/><line x1="38.8" y1="36.8" x2="51.6" y2="44.8"/><line x1="51.6" y1="44.8" x2="48.4" y2="75.2"/><line x1="48.4" y1="75.2" x2="80.4" y2="80.0"/><line x1="80.4" y1="80.0" x2="85.2" y2="48.0"/><line x1="85.2" y1="48.0" x2="51.6" y2="44.8"/></svg>
+          <ul><li style="left:11.6%;top:14.4%;--n:0;--tw:2.40s"><button class="skill star m1" type="button" data-used="SkillConnect"><i aria-hidden="true"></i><span>Java</span></button></li><li style="left:26.0%;top:28.8%;--n:1;--tw:2.77s"><button class="skill star m3" type="button" data-used="OrbitGuard, EV Twin, SmartSpray"><i aria-hidden="true"></i><span>Python</span></button></li><li style="left:38.8%;top:36.8%;--n:2;--tw:3.14s"><button class="skill star m3" type="button" data-used="HemoPhysio, SmartSpray, Pluto Drone Verifier"><i aria-hidden="true"></i><span>Dart</span></button></li><li style="left:51.6%;top:44.8%;--n:3;--tw:3.51s"><button class="skill star m3" type="button" data-used="Fieldwise, Silicon Atlas, Solar Gesture Explorer"><i aria-hidden="true"></i><span>JavaScript</span></button></li><li style="left:48.4%;top:75.2%;--n:4;--tw:3.88s"><button class="skill star m1" type="button" data-used="Kosh"><i aria-hidden="true"></i><span>TypeScript</span></button></li><li style="left:80.4%;top:80.0%;--n:5;--tw:4.25s"><button class="skill star m0" type="button" data-used=""><i aria-hidden="true"></i><span>C</span></button></li><li style="left:85.2%;top:48.0%;--n:6;--tw:4.62s"><button class="skill star m2" type="button" data-used="SkillConnect, WelfareWatch"><i aria-hidden="true"></i><span>SQL</span></button></li></ul>
         </div>
       </div>
       <div class="const" data-rise style="--i:1">
-        <p class="const-name"><span>Web &amp; mobile</span><b>9</b></p>
+        <p class="const-name"><span>Web &amp; mobile</span><em>Orion</em></p>
         <div class="const-field">
-          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="12.0,22.9 21.5,51.1 31.0,80.9 40.5,18.5 50.0,55.8 59.5,83.9 69.0,23.8 78.5,47.9 88.0,80.2"/></svg>
-          <ul><li style="left:12.0%;top:22.9%;--n:7;--tw:3.12s"><button class="skill star big" type="button" data-used="HemoPhysio, SmartSpray, Pluto Drone Verifier"><i aria-hidden="true"></i><span>Flutter</span></button></li><li style="left:21.5%;top:51.1%;--n:8;--tw:2.90s"><button class="skill star" type="button" data-used="Kosh"><i aria-hidden="true"></i><span>Next.js</span></button></li><li style="left:31.0%;top:80.9%;--n:9;--tw:4.87s"><button class="skill star" type="button" data-used="Kosh"><i aria-hidden="true"></i><span>React</span></button></li><li style="left:40.5%;top:18.5%;--n:10;--tw:4.99s"><button class="skill star" type="button" data-used="OrbitGuard, Solar Gesture Explorer"><i aria-hidden="true"></i><span>three.js</span></button></li><li style="left:50.0%;top:55.8%;--n:11;--tw:2.32s"><button class="skill star" type="button" data-used="Fieldwise"><i aria-hidden="true"></i><span>HTML</span></button></li><li style="left:59.5%;top:83.9%;--n:12;--tw:4.61s"><button class="skill star" type="button" data-used="Fieldwise"><i aria-hidden="true"></i><span>CSS</span></button></li><li style="left:69.0%;top:23.8%;--n:13;--tw:3.89s"><button class="skill star" type="button" data-used="SkillConnect"><i aria-hidden="true"></i><span>JSP</span></button></li><li style="left:78.5%;top:47.9%;--n:14;--tw:3.27s"><button class="skill star" type="button" data-used="SkillConnect"><i aria-hidden="true"></i><span>Servlets</span></button></li><li style="left:88.0%;top:80.2%;--n:15;--tw:2.99s"><button class="skill star" type="button" data-used="SkillConnect"><i aria-hidden="true"></i><span>JDBC</span></button></li></ul>
+          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="50.0" y1="9.6" x2="24.4" y2="22.4"/><line x1="50.0" y1="9.6" x2="74.0" y2="25.6"/><line x1="24.4" y1="22.4" x2="34.0" y2="49.6"/><line x1="74.0" y1="25.6" x2="66.0" y2="40.0"/><line x1="34.0" y1="49.6" x2="50.0" y2="44.8"/><line x1="50.0" y1="44.8" x2="66.0" y2="40.0"/><line x1="50.0" y1="44.8" x2="51.6" y2="62.4"/><line x1="34.0" y1="49.6" x2="27.6" y2="81.6"/><line x1="66.0" y1="40.0" x2="77.2" y2="76.8"/></svg>
+          <ul><li style="left:50.0%;top:9.6%;--n:7;--tw:4.99s"><button class="skill star m3" type="button" data-used="HemoPhysio, SmartSpray, Pluto Drone Verifier"><i aria-hidden="true"></i><span>Flutter</span></button></li><li style="left:24.4%;top:22.4%;--n:8;--tw:2.76s"><button class="skill star m1" type="button" data-used="Kosh"><i aria-hidden="true"></i><span>Next.js</span></button></li><li style="left:74.0%;top:25.6%;--n:9;--tw:3.13s"><button class="skill star m1" type="button" data-used="Kosh"><i aria-hidden="true"></i><span>React</span></button></li><li style="left:34.0%;top:49.6%;--n:10;--tw:3.50s"><button class="skill star m2" type="button" data-used="OrbitGuard, Solar Gesture Explorer"><i aria-hidden="true"></i><span>three.js</span></button></li><li style="left:50.0%;top:44.8%;--n:11;--tw:3.87s"><button class="skill star m1" type="button" data-used="Fieldwise"><i aria-hidden="true"></i><span>HTML</span></button></li><li style="left:66.0%;top:40.0%;--n:12;--tw:4.24s"><button class="skill star m1" type="button" data-used="Fieldwise"><i aria-hidden="true"></i><span>CSS</span></button></li><li style="left:51.6%;top:62.4%;--n:13;--tw:4.61s"><button class="skill star m1" type="button" data-used="SkillConnect"><i aria-hidden="true"></i><span>JSP</span></button></li><li style="left:27.6%;top:81.6%;--n:14;--tw:4.98s"><button class="skill star m1" type="button" data-used="SkillConnect"><i aria-hidden="true"></i><span>Servlets</span></button></li><li style="left:77.2%;top:76.8%;--n:15;--tw:2.75s"><button class="skill star m1" type="button" data-used="SkillConnect"><i aria-hidden="true"></i><span>JDBC</span></button></li></ul>
         </div>
       </div>
       <div class="const" data-rise style="--i:2">
-        <p class="const-name"><span>Backend &amp; APIs</span><b>4</b></p>
+        <p class="const-name"><span>Backend &amp; APIs</span><em>Crux</em></p>
         <div class="const-field">
-          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="12.0,22.3 37.3,55.7 62.7,85.5 88.0,19.5"/></svg>
-          <ul><li style="left:12.0%;top:22.3%;--n:16;--tw:4.35s"><button class="skill star" type="button" data-used="HemoPhysio, SmartSpray"><i aria-hidden="true"></i><span>FastAPI</span></button></li><li style="left:37.3%;top:55.7%;--n:17;--tw:4.17s"><button class="skill star" type="button" data-used="OrbitGuard, EV Twin"><i aria-hidden="true"></i><span>Flask</span></button></li><li style="left:62.7%;top:85.5%;--n:18;--tw:4.05s"><button class="skill star" type="button" data-used="HemoPhysio, SmartSpray"><i aria-hidden="true"></i><span>REST APIs</span></button></li><li style="left:88.0%;top:19.5%;--n:19;--tw:2.51s"><button class="skill star" type="button" data-used="SkillConnect"><i aria-hidden="true"></i><span>Apache Tomcat</span></button></li></ul>
+          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="50.0" y1="12.8" x2="50.0" y2="81.6"/><line x1="24.4" y1="44.8" x2="75.6" y2="38.4"/></svg>
+          <ul><li style="left:50.0%;top:12.8%;--n:16;--tw:3.12s"><button class="skill star m2" type="button" data-used="HemoPhysio, SmartSpray"><i aria-hidden="true"></i><span>FastAPI</span></button></li><li style="left:50.0%;top:81.6%;--n:17;--tw:3.49s"><button class="skill star m2" type="button" data-used="OrbitGuard, EV Twin"><i aria-hidden="true"></i><span>Flask</span></button></li><li style="left:24.4%;top:44.8%;--n:18;--tw:3.86s"><button class="skill star m2" type="button" data-used="HemoPhysio, SmartSpray"><i aria-hidden="true"></i><span>REST APIs</span></button></li><li style="left:75.6%;top:38.4%;--n:19;--tw:4.23s"><button class="skill star m1" type="button" data-used="SkillConnect"><i aria-hidden="true"></i><span>Apache Tomcat</span></button></li></ul>
         </div>
       </div>
       <div class="const" data-rise style="--i:3">
-        <p class="const-name"><span>Data &amp; cloud</span><b>5</b></p>
+        <p class="const-name"><span>Data &amp; cloud</span><em>Cassiopeia</em></p>
         <div class="const-field">
-          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="12.0,24.5 31.0,56.1 50.0,76.2 69.0,28.0 88.0,48.3"/></svg>
-          <ul><li style="left:12.0%;top:24.5%;--n:20;--tw:4.08s"><button class="skill star" type="button" data-used="SkillConnect"><i aria-hidden="true"></i><span>MySQL</span></button></li><li style="left:31.0%;top:56.1%;--n:21;--tw:2.46s"><button class="skill star" type="button" data-used=""><i aria-hidden="true"></i><span>MongoDB</span></button></li><li style="left:50.0%;top:76.2%;--n:22;--tw:4.32s"><button class="skill star" type="button" data-used="HemoPhysio"><i aria-hidden="true"></i><span>Firebase Auth</span></button></li><li style="left:69.0%;top:28.0%;--n:23;--tw:2.62s"><button class="skill star" type="button" data-used="HemoPhysio"><i aria-hidden="true"></i><span>Cloud Firestore</span></button></li><li style="left:88.0%;top:48.3%;--n:24;--tw:4.18s"><button class="skill star" type="button" data-used=""><i aria-hidden="true"></i><span>Google Cloud</span></button></li></ul>
+          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="16.4" y1="32.0" x2="33.2" y2="65.6"/><line x1="33.2" y1="65.6" x2="50.0" y2="40.0"/><line x1="50.0" y1="40.0" x2="66.8" y2="72.0"/><line x1="66.8" y1="72.0" x2="83.6" y2="30.4"/></svg>
+          <ul><li style="left:16.4%;top:32.0%;--n:20;--tw:4.60s"><button class="skill star m1" type="button" data-used="SkillConnect"><i aria-hidden="true"></i><span>MySQL</span></button></li><li style="left:33.2%;top:65.6%;--n:21;--tw:4.97s"><button class="skill star m0" type="button" data-used=""><i aria-hidden="true"></i><span>MongoDB</span></button></li><li style="left:50.0%;top:40.0%;--n:22;--tw:2.74s"><button class="skill star m1" type="button" data-used="HemoPhysio"><i aria-hidden="true"></i><span>Firebase Auth</span></button></li><li style="left:66.8%;top:72.0%;--n:23;--tw:3.11s"><button class="skill star m1" type="button" data-used="HemoPhysio"><i aria-hidden="true"></i><span>Cloud Firestore</span></button></li><li style="left:83.6%;top:30.4%;--n:24;--tw:3.48s"><button class="skill star m0" type="button" data-used=""><i aria-hidden="true"></i><span>Google Cloud</span></button></li></ul>
         </div>
       </div>
       <div class="const" data-rise style="--i:4">
-        <p class="const-name"><span>IoT &amp; embedded</span><b>5</b></p>
+        <p class="const-name"><span>IoT &amp; embedded</span><em>Cygnus</em></p>
         <div class="const-field">
-          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="12.0,16.1 31.0,47.3 50.0,78.7 69.0,24.2 88.0,47.7"/></svg>
-          <ul><li style="left:12.0%;top:16.1%;--n:25;--tw:2.51s"><button class="skill star big" type="button" data-used="Pura Air, Pura Aqua, SmartSpray"><i aria-hidden="true"></i><span>ESP32</span></button></li><li style="left:31.0%;top:47.3%;--n:26;--tw:2.85s"><button class="skill star" type="button" data-used="HemoPhysio"><i aria-hidden="true"></i><span>ESP32-S3</span></button></li><li style="left:50.0%;top:78.7%;--n:27;--tw:4.32s"><button class="skill star" type="button" data-used=""><i aria-hidden="true"></i><span>Arduino IDE</span></button></li><li style="left:69.0%;top:24.2%;--n:28;--tw:2.61s"><button class="skill star" type="button" data-used="Pura Air"><i aria-hidden="true"></i><span>MQTT</span></button></li><li style="left:88.0%;top:47.7%;--n:29;--tw:4.27s"><button class="skill star big" type="button" data-used="HemoPhysio, Pura Air, Pura Aqua, SmartSpray"><i aria-hidden="true"></i><span>Sensor interfacing</span></button></li></ul>
+          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="50.0" y1="12.8" x2="50.0" y2="40.0"/><line x1="50.0" y1="40.0" x2="50.0" y2="81.6"/><line x1="21.2" y1="52.8" x2="50.0" y2="40.0"/><line x1="50.0" y1="40.0" x2="78.8" y2="32.0"/></svg>
+          <ul><li style="left:50.0%;top:12.8%;--n:25;--tw:3.85s"><button class="skill star m3" type="button" data-used="Pura Air, Pura Aqua, SmartSpray"><i aria-hidden="true"></i><span>ESP32</span></button></li><li style="left:50.0%;top:40.0%;--n:26;--tw:4.22s"><button class="skill star m1" type="button" data-used="HemoPhysio"><i aria-hidden="true"></i><span>ESP32-S3</span></button></li><li style="left:50.0%;top:81.6%;--n:27;--tw:4.59s"><button class="skill star m0" type="button" data-used=""><i aria-hidden="true"></i><span>Arduino IDE</span></button></li><li style="left:21.2%;top:52.8%;--n:28;--tw:4.96s"><button class="skill star m1" type="button" data-used="Pura Air"><i aria-hidden="true"></i><span>MQTT</span></button></li><li style="left:78.8%;top:32.0%;--n:29;--tw:2.73s"><button class="skill star m3" type="button" data-used="HemoPhysio, Pura Air, Pura Aqua, SmartSpray"><i aria-hidden="true"></i><span>Sensor interfacing</span></button></li></ul>
         </div>
       </div>
       <div class="const" data-rise style="--i:5">
-        <p class="const-name"><span>AI &amp; ML</span><b>6</b></p>
+        <p class="const-name"><span>AI &amp; ML</span><em>Lyra</em></p>
         <div class="const-field">
-          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="12.0,23.7 27.2,51.1 42.4,82.7 57.6,16.8 72.8,54.4 88.0,78.5"/></svg>
-          <ul><li style="left:12.0%;top:23.7%;--n:30;--tw:3.90s"><button class="skill star" type="button" data-used="Pluto Drone Verifier"><i aria-hidden="true"></i><span>OpenCV</span></button></li><li style="left:27.2%;top:51.1%;--n:31;--tw:2.68s"><button class="skill star" type="button" data-used="Solar Gesture Explorer"><i aria-hidden="true"></i><span>MediaPipe</span></button></li><li style="left:42.4%;top:82.7%;--n:32;--tw:3.16s"><button class="skill star" type="button" data-used="SmartSpray"><i aria-hidden="true"></i><span>YOLO</span></button></li><li style="left:57.6%;top:16.8%;--n:33;--tw:2.95s"><button class="skill star" type="button" data-used="SmartSpray"><i aria-hidden="true"></i><span>RAG</span></button></li><li style="left:72.8%;top:54.4%;--n:34;--tw:3.12s"><button class="skill star" type="button" data-used="SmartSpray, Kosh"><i aria-hidden="true"></i><span>Gemini</span></button></li><li style="left:88.0%;top:78.5%;--n:35;--tw:4.23s"><button class="skill star" type="button" data-used="OrbitGuard, EV Twin"><i aria-hidden="true"></i><span>Ollama</span></button></li></ul>
+          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="35.6" y1="14.4" x2="19.6" y2="28.8"/><line x1="35.6" y1="14.4" x2="45.2" y2="38.4"/><line x1="45.2" y1="38.4" x2="67.6" y2="41.6"/><line x1="67.6" y1="41.6" x2="59.6" y2="78.4"/><line x1="59.6" y1="78.4" x2="34.0" y2="72.0"/><line x1="34.0" y1="72.0" x2="45.2" y2="38.4"/></svg>
+          <ul><li style="left:35.6%;top:14.4%;--n:30;--tw:3.10s"><button class="skill star m1" type="button" data-used="Pluto Drone Verifier"><i aria-hidden="true"></i><span>OpenCV</span></button></li><li style="left:19.6%;top:28.8%;--n:31;--tw:3.47s"><button class="skill star m1" type="button" data-used="Solar Gesture Explorer"><i aria-hidden="true"></i><span>MediaPipe</span></button></li><li style="left:45.2%;top:38.4%;--n:32;--tw:3.84s"><button class="skill star m1" type="button" data-used="SmartSpray"><i aria-hidden="true"></i><span>YOLO</span></button></li><li style="left:67.6%;top:41.6%;--n:33;--tw:4.21s"><button class="skill star m1" type="button" data-used="SmartSpray"><i aria-hidden="true"></i><span>RAG</span></button></li><li style="left:59.6%;top:78.4%;--n:34;--tw:4.58s"><button class="skill star m2" type="button" data-used="SmartSpray, Kosh"><i aria-hidden="true"></i><span>Gemini</span></button></li><li style="left:34.0%;top:72.0%;--n:35;--tw:4.95s"><button class="skill star m2" type="button" data-used="OrbitGuard, EV Twin"><i aria-hidden="true"></i><span>Ollama</span></button></li></ul>
         </div>
       </div>
       <div class="const" data-rise style="--i:6">
-        <p class="const-name"><span>Tools</span><b>3</b></p>
+        <p class="const-name"><span>Tools</span><em>Triangulum</em></p>
         <div class="const-field">
-          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="12.0,19.3 50.0,51.9 88.0,75.0"/></svg>
-          <ul><li style="left:12.0%;top:19.3%;--n:36;--tw:3.15s"><button class="skill star" type="button" data-used=""><i aria-hidden="true"></i><span>Git</span></button></li><li style="left:50.0%;top:51.9%;--n:37;--tw:2.40s"><button class="skill star" type="button" data-used=""><i aria-hidden="true"></i><span>GitHub</span></button></li><li style="left:88.0%;top:75.0%;--n:38;--tw:2.23s"><button class="skill star big" type="button" data-used="OrbitGuard, EV Twin, Kosh"><i aria-hidden="true"></i><span>Vercel</span></button></li></ul>
+          <svg class="const-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="19.6" y1="65.6" x2="54.0" y2="22.4"/><line x1="54.0" y1="22.4" x2="80.4" y2="57.6"/><line x1="80.4" y1="57.6" x2="19.6" y2="65.6"/></svg>
+          <ul><li style="left:19.6%;top:65.6%;--n:36;--tw:2.72s"><button class="skill star m0" type="button" data-used=""><i aria-hidden="true"></i><span>Git</span></button></li><li style="left:54.0%;top:22.4%;--n:37;--tw:3.09s"><button class="skill star m0" type="button" data-used=""><i aria-hidden="true"></i><span>GitHub</span></button></li><li style="left:80.4%;top:57.6%;--n:38;--tw:3.46s"><button class="skill star m3" type="button" data-used="OrbitGuard, EV Twin, Kosh"><i aria-hidden="true"></i><span>Vercel</span></button></li></ul>
         </div>
       </div>
     </div>

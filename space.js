@@ -4,7 +4,7 @@
 import * as THREE from './vendor/three.module.min.js';
 import {
   FULLSCREEN_VS, BLACKHOLE_FS, WARP_FS, PLANET_VS, PLANET_FS, ATMO_FS, SUN_FS, LANDING_FS,
-  FLAME_VS, FLAME_FS, RING_VS, RING_FS, GLOW_VS, GLOW_FS, SMOKE_VS, SMOKE_FS, RAYS_FS, SPARK_VS, SPARK_FS,
+  FLAME_VS, FLAME_FS, RING_VS, RING_FS, GLOW_VS, GLOW_FS, SMOKE_VS, SMOKE_FS, RAYS_FS, SPARK_VS, SPARK_FS, STARFIELD_FS,
 } from './js/shaders.js';
 
 const root = document.documentElement;
@@ -112,6 +112,13 @@ function start() {
   }), 0);
   scene.add(bhBlit);
 
+  /* --- deep-sky stars behind every scene after the landing */
+  const skyMat = new THREE.ShaderMaterial({
+    vertexShader: FULLSCREEN_VS, fragmentShader: STARFIELD_FS, transparent: true, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uRes: { value: new THREE.Vector2() }, uTime: { value: 0 }, uAlpha: { value: 0 }, uTurn: { value: 0 } },
+  });
+  const sky = flat(skyMat, 0); scene.add(sky);
+
   /* --- star warp for the trips between scenes */
   const warpMat = new THREE.ShaderMaterial({
     vertexShader: FULLSCREEN_VS, fragmentShader: WARP_FS, transparent: true, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending,
@@ -135,7 +142,7 @@ function start() {
       vertexShader: PLANET_VS, fragmentShader: ATMO_FS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
       uniforms: { uColor: { value: C(d.atmo).multiplyScalar(d.atmoA) }, uSun: mat.uniforms.uSun, uOpacity: { value: 1 } },
     });
-    const atmo = new THREE.Mesh(hi ? sphereHi : sphereLo, atmoMat); atmo.scale.setScalar(name === 'Earth' ? 1.06 : 1.04); atmo.renderOrder = 6; g.add(atmo);
+    const atmo = new THREE.Mesh(hi ? sphereHi : sphereLo, atmoMat); atmo.scale.setScalar(name === 'Earth' ? 1.035 : 1.04); atmo.renderOrder = 6; g.add(atmo);
     let ring = null;
     if (d.ring) {
       ring = new THREE.Mesh(ringGeo, new THREE.ShaderMaterial({ vertexShader: RING_VS, fragmentShader: RING_FS, transparent: true, side: THREE.DoubleSide, depthWrite: false,
@@ -167,8 +174,8 @@ function start() {
     const rays = new THREE.Mesh(glowGeo, new THREE.ShaderMaterial({ vertexShader: GLOW_VS, fragmentShader: RAYS_FS, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending,
       uniforms: { uTime: { value: 0 }, uAlpha: { value: 1 } } }));
     rays.renderOrder = 3; scene.add(rays);
-    const n = 420, pos = new Float32Array(n * 3), age = new Float32Array(n), size = new Float32Array(n), dir = new Float32Array(n * 2), spd = new Float32Array(n);
-    for (let i = 0; i < n; i++) { age[i] = Math.random(); const a = Math.random() * Math.PI * 2; dir[i * 2] = Math.cos(a); dir[i * 2 + 1] = Math.sin(a); spd[i] = 0.12 + Math.random() * 0.35; size[i] = 1.5 + Math.random() * 3; }
+    const n = 1100, pos = new Float32Array(n * 3), age = new Float32Array(n), size = new Float32Array(n), dir = new Float32Array(n * 2), spd = new Float32Array(n);
+    for (let i = 0; i < n; i++) { age[i] = Math.random(); const a = Math.random() * Math.PI * 2; dir[i * 2] = Math.cos(a); dir[i * 2 + 1] = Math.sin(a); spd[i] = 0.08 + Math.random() * 0.3; size[i] = 1 + Math.random() * Math.random() * 3.2; }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('aAge', new THREE.BufferAttribute(age, 1)); geo.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
     const mat = new THREE.ShaderMaterial({ vertexShader: SPARK_VS, fragmentShader: SPARK_FS, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending,
@@ -177,11 +184,13 @@ function start() {
     return {
       update(c, r, alpha, dt, time) {
         const on = alpha > 0.002; rays.visible = pts.visible = on; if (!on) return;
-        rays.position.copy(c).setZ(-1900); rays.scale.setScalar(r * 7.5); rays.material.uniforms.uTime.value = time; rays.material.uniforms.uAlpha.value = alpha * 0.9;
+        rays.position.copy(c).setZ(-1900); rays.scale.setScalar(r * 7.5);   // quad half-size 3.75r, so the edge sits at 0.267 rays.material.uniforms.uTime.value = time; rays.material.uniforms.uAlpha.value = alpha * 0.9;
         mat.uniforms.uAlpha.value = alpha; mat.uniforms.uDpr.value = renderer.getPixelRatio(); mat.uniforms.uScale.value = clamp(r / 160, 0.6, 1.6);
         for (let i = 0; i < n; i++) {
           age[i] += dt * spd[i] * 0.6; if (age[i] >= 1) { age[i] = 0.0001; const a = Math.random() * Math.PI * 2; dir[i * 2] = Math.cos(a); dir[i * 2 + 1] = Math.sin(a); }
-          const d = r * (1.02 + age[i] * (1.6 + spd[i] * 4)), sw = Math.sin(age[i] * 6 + i) * 0.06;
+          const loop = i % 9 === 0;                          // a few arc up and fall back like prominences
+          const lift = loop ? Math.sin(age[i] * Math.PI) * 0.35 : age[i] * (1.4 + spd[i] * 4.5);
+          const d = r * (1.0 + lift), sw = loop ? (age[i] - 0.5) * 0.5 : Math.sin(age[i] * 4 + i) * 0.05 + age[i] * 0.08;
           pos[i * 3] = c.x + (dir[i * 2] - dir[i * 2 + 1] * sw) * d; pos[i * 3 + 1] = c.y + (dir[i * 2 + 1] + dir[i * 2] * sw) * d; pos[i * 3 + 2] = c.z + 10;
         }
         geo.attributes.position.needsUpdate = true; geo.attributes.aAge.needsUpdate = true;
@@ -207,7 +216,7 @@ function start() {
 
   // Earth, close up, for the internships
   const earth = makePlanet('Earth', true); scene.add(earth.g);
-  earth.atmoMat.uniforms.uColor.value = C('#4f9dff').multiplyScalar(1.3);
+  earth.atmoMat.uniforms.uColor.value = C('#5aa2ff').multiplyScalar(1.1);
   const moon = makePlanet('Mercury', false); scene.add(moon.g);
   const earthGlow = new THREE.Mesh(glowGeo, glowMat('#3f8cff', 3)); earthGlow.renderOrder = 4; scene.add(earthGlow);
 
@@ -222,28 +231,55 @@ function start() {
   const rocket = new THREE.Group(); rocket.renderOrder = 100; scene.add(rocket);
   const bodyG = new THREE.Group(); rocket.add(bodyG);
   const std = (o) => new THREE.MeshStandardMaterial({ transparent: true, ...o });
-  const white = std({ color: 0xf2f2f4, roughness: 0.35, metalness: 0.25 });
-  const accent = std({ color: 0xff5a3c, roughness: 0.45, metalness: 0.2 });
-  const dark = std({ color: 0x2a2c33, roughness: 0.4, metalness: 0.7 });
-  const prof = [[0, -0.5], [0.105, -0.5], [0.125, -0.44], [0.13, -0.2], [0.13, 0.1], [0.122, 0.2], [0.1, 0.31], [0.07, 0.4], [0.035, 0.465], [0, 0.5]].map(([x, y]) => new THREE.Vector2(x, y));
-  const hull = new THREE.Mesh(new THREE.LatheGeometry(prof, 48), white); bodyG.add(hull);
-  const nose = new THREE.Mesh(new THREE.LatheGeometry(prof.slice(6).map((v) => new THREE.Vector2(v.x * 1.012, v.y)), 48), accent); bodyG.add(nose);
-  const band = new THREE.Mesh(new THREE.CylinderGeometry(0.133, 0.133, 0.035, 48, 1, true), accent); band.position.y = -0.12; bodyG.add(band);
-  const win = new THREE.Mesh(new THREE.SphereGeometry(0.048, 24, 16), std({ color: 0x8fdcff, emissive: 0x2a7fb8, emissiveIntensity: 0.9, roughness: 0.1, metalness: 0.4 }));
-  win.position.set(0, 0.14, 0.118); win.scale.z = 0.45; bodyG.add(win);
-  const ringWin = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.01, 8, 24), dark); ringWin.position.copy(win.position); bodyG.add(ringWin);
-  const finShape = new THREE.Shape(); finShape.moveTo(0, 0); finShape.lineTo(0.13, -0.09); finShape.lineTo(0.14, -0.24); finShape.lineTo(0, -0.17); finShape.closePath();
-  const finGeo = new THREE.ExtrudeGeometry(finShape, { depth: 0.018, bevelEnabled: false }); finGeo.translate(0, 0, -0.009);
-  for (let i = 0; i < 3; i++) {
-    const f = new THREE.Mesh(finGeo, accent); const a = (i / 3) * Math.PI * 2 + 0.5;
-    const pivot = new THREE.Group(); pivot.rotation.y = a; f.position.set(0.11, -0.26, 0); pivot.add(f); bodyG.add(pivot);
-  }
-  const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.095, 0.08, 32, 1, true), dark); nozzle.position.y = -0.54; bodyG.add(nozzle);
+  const white = std({ color: 0xf4f5f8, roughness: 0.22, metalness: 0.55 });
+  const chrome = std({ color: 0xdfe6ee, roughness: 0.12, metalness: 0.95 });
+  const accent = std({ color: 0xff4d2e, roughness: 0.35, metalness: 0.3 });
+  const dark = std({ color: 0x1c1e25, roughness: 0.5, metalness: 0.6 });
+  const tiles = std({ color: 0x15171c, roughness: 0.75, metalness: 0.2 });
+  const glowRing = new THREE.MeshBasicMaterial({ color: 0xff9a4a, transparent: true });
+  const V = (x, y) => new THREE.Vector2(x, y);
+  // a long, slim hull with an ogive nose
+  const prof = [V(0, -0.5), V(0.1, -0.5), V(0.118, -0.46), V(0.12, -0.1), V(0.12, 0.16), V(0.112, 0.26), V(0.092, 0.35), V(0.064, 0.42), V(0.034, 0.47), V(0.012, 0.495), V(0, 0.5)];
+  const hull = new THREE.Mesh(new THREE.LatheGeometry(prof, 64), white); bodyG.add(hull);
+  const nose = new THREE.Mesh(new THREE.LatheGeometry(prof.slice(7).map((v) => V(v.x * 1.01, v.y)), 64), chrome); bodyG.add(nose);
+  // dark heat-shield tiles down one side, so the spin reads
+  const shield = new THREE.Mesh(new THREE.CylinderGeometry(0.1215, 0.1215, 0.62, 48, 1, true, -Math.PI * 0.45, Math.PI * 0.9), tiles); shield.position.y = -0.14; bodyG.add(shield);
+  [-0.42, -0.24, 0.02, 0.18].forEach((y, i) => { const r = new THREE.Mesh(new THREE.CylinderGeometry(0.1225, 0.1225, i === 2 ? 0.03 : 0.008, 48, 1, true), i === 2 ? accent : dark); r.position.y = y; bodyG.add(r); });
+  const win = new THREE.Mesh(new THREE.CapsuleGeometry(0.022, 0.06, 6, 12), std({ color: 0x9fe6ff, emissive: 0x3aa0ff, emissiveIntensity: 1.6, roughness: 0.05, metalness: 0.3 }));
+  win.rotation.z = Math.PI / 2; win.position.set(0, 0.26, 0.103); win.scale.z = 0.5; bodyG.add(win);
+  // swept fins
+  const finShape = new THREE.Shape(); finShape.moveTo(0, 0); finShape.lineTo(0.11, -0.13); finShape.lineTo(0.13, -0.27); finShape.lineTo(0.03, -0.21); finShape.lineTo(0, -0.16); finShape.closePath();
+  const finGeo = new THREE.ExtrudeGeometry(finShape, { depth: 0.014, bevelEnabled: true, bevelThickness: 0.004, bevelSize: 0.004, bevelSegments: 1 }); finGeo.translate(0, 0, -0.007);
+  for (let i = 0; i < 4; i++) { const f = new THREE.Mesh(finGeo, accent); const pivot = new THREE.Group(); pivot.rotation.y = (i / 4) * Math.PI * 2 + Math.PI / 4; f.position.set(0.105, -0.25, 0); pivot.add(f); bodyG.add(pivot); }
+  // engine bell with a glowing throat
+  const bell = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.098, 0.1, 40, 1, true), chrome); bell.position.y = -0.55; bodyG.add(bell);
+  const throat = new THREE.Mesh(new THREE.RingGeometry(0.03, 0.094, 40), glowRing); throat.rotation.x = Math.PI / 2; throat.position.y = -0.598; bodyG.add(throat);
+  // two side boosters
+  const bProf = [V(0, -0.2), V(0.045, -0.2), V(0.05, -0.17), V(0.05, 0.12), V(0.032, 0.2), V(0.012, 0.24), V(0, 0.25)];
+  const boosters = [-1, 1].map((sd) => {
+    const g = new THREE.Group(); g.position.set(sd * 0.168, -0.26, 0);
+    g.add(new THREE.Mesh(new THREE.LatheGeometry(bProf, 32), white));
+    const tip = new THREE.Mesh(new THREE.LatheGeometry(bProf.slice(4), 32), accent); g.add(tip);
+    const bb = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.045, 0.05, 24, 1, true), chrome); bb.position.y = -0.22; g.add(bb);
+    const strut = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.012, 0.012), dark); strut.position.set(-sd * 0.03, 0.05, 0); g.add(strut);
+    bodyG.add(g); return g;
+  });
   const flameMat = new THREE.ShaderMaterial({ vertexShader: FLAME_VS, fragmentShader: FLAME_FS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
-    uniforms: { uTime: { value: 0 }, uPower: { value: 1 } } });
-  const flameGeo = new THREE.ConeGeometry(0.085, 1, 32, 1, true); flameGeo.rotateX(Math.PI); flameGeo.translate(0, -0.5, 0);
-  const flame = new THREE.Mesh(flameGeo, flameMat); flame.position.y = -0.575; flame.renderOrder = 101; rocket.add(flame);
-  const flameGlow = new THREE.Mesh(glowGeo, glowMat('#ffb070', 2)); flameGlow.material.depthTest = true; flameGlow.position.y = -0.7; flameGlow.renderOrder = 99; rocket.add(flameGlow);
+    uniforms: { uTime: { value: 0 }, uPower: { value: 1 }, uCore: { value: 0 } } });
+  const coreMat = flameMat.clone(); coreMat.uniforms.uCore.value = 1;
+  const flameGeo = new THREE.ConeGeometry(0.09, 1, 32, 1, true); flameGeo.rotateX(Math.PI); flameGeo.translate(0, -0.5, 0);
+  const flame = new THREE.Group(); flame.position.y = -0.6; flame.renderOrder = 101; rocket.add(flame);
+  const outer = new THREE.Mesh(flameGeo, flameMat); outer.renderOrder = 101; flame.add(outer);
+  const inner = new THREE.Mesh(flameGeo, coreMat); inner.scale.set(0.5, 0.62, 0.5); inner.renderOrder = 102; flame.add(inner);
+  const sideFlames = boosters.map((g) => { const m = new THREE.Mesh(flameGeo, flameMat); m.scale.set(0.5, 0.45, 0.5); m.position.y = -0.245; m.renderOrder = 101; g.add(m); return m; });
+  const flameGlow = new THREE.Mesh(glowGeo, glowMat('#ffb070', 2)); flameGlow.material.depthTest = true; flameGlow.position.y = -0.72; flameGlow.renderOrder = 99; rocket.add(flameGlow);
+  // exhaust trail left behind in space
+  const NT = 260, tPos = new Float32Array(NT * 3), tAge = new Float32Array(NT), tSize = new Float32Array(NT), tVel = new Float32Array(NT * 2);
+  const tGeo = new THREE.BufferGeometry();
+  tGeo.setAttribute('position', new THREE.BufferAttribute(tPos, 3)); tGeo.setAttribute('aAge', new THREE.BufferAttribute(tAge, 1)); tGeo.setAttribute('aSize', new THREE.BufferAttribute(tSize, 1));
+  const trailMat = new THREE.ShaderMaterial({ vertexShader: SPARK_VS, fragmentShader: SPARK_FS, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending, uniforms: { uDpr: { value: 1 }, uAlpha: { value: 0.8 }, uScale: { value: 1 } } });
+  const trail = new THREE.Points(tGeo, trailMat); trail.frustumCulled = false; trail.renderOrder = 98; scene.add(trail);
+  let tNext = 0;
   rocket.traverse((o) => { if (o.isMesh && o.renderOrder === 0) o.renderOrder = 100; });
   scene.add(new THREE.HemisphereLight(0xcfe3ff, 0x1a1420, 1.4));
   const key = new THREE.DirectionalLight(0xffffff, 3.2); key.position.set(-1, 0.8, 1.2); scene.add(key);
@@ -289,15 +325,19 @@ function start() {
     const asp = S.W / S.H;
     bhMat.uniforms.uShift.value.set(S.mobile ? asp * 0.22 : asp * 0.25, S.mobile ? 0.24 : 0.03);
     bhMat.uniforms.uZoom.value = asp < 0.8 ? 1.25 : 2.2;
-    warpMat.uniforms.uRes.value.set(S.W, S.H);
+    warpMat.uniforms.uRes.value.set(S.W, S.H); skyMat.uniforms.uRes.value.set(S.W, S.H);
     landMat.uniforms.uRes.value.set(S.W, S.H);
     landMat.uniforms.uPadPos.value.set(S.mobile ? 0.86 : 0.86, S.mobile ? 0.27 : 0.32);
     smokeMat.uniforms.uDpr.value = dpr;
     if (orbitEl && motion) {
       L.slot = S.mobile ? S.W * 0.8 : clamp(S.W * 0.3, 300, 470);
-      worldsEl.style.setProperty('--track-pad', `${(S.W - L.slot) / 2}px`);
-      $$('.world', worldsEl).forEach((w) => w.style.setProperty('--slot', `${L.slot}px`));
-      L.travel = L.slot * (ORDER.length - 1);
+      const cw = document.documentElement.clientWidth;
+      worldsEl.style.setProperty('--track-pad', `${(cw - L.slot) / 2}px`);
+      const ws = $$('.world', worldsEl);
+      ws.forEach((w) => { w.style.setProperty('--slot', `${L.slot}px`); w.style.minWidth = '0'; });
+      // measure the real distance from the first planet to the last, so the track ends exactly on Pluto
+      const cx = (w) => w.offsetLeft + w.offsetWidth / 2;
+      L.travel = Math.max(1, cx(ws[ws.length - 1]) - cx(ws[0]));
       orbitEl.style.setProperty('--orbit-h', `${S.H + L.travel}px`);
     }
     const top = (el) => el.getBoundingClientRect().top + scrollY;
@@ -326,7 +366,7 @@ function start() {
 
   /* ---------- Rocket choreography: a pose per section, blended by scroll, then eased */
   const R = { x: 0, y: 0, a: 30, sz: 1, pow: 0.6, z: 1500, init: false };
-  const rocketPx = () => (S.mobile ? 80 : 112);
+  const rocketPx = () => (S.mobile ? 90 : 132);
   function earthPose(t) {
     const m = S.mobile, W = S.W, H = S.H;
     const fx = m ? 0.72 : 0.74, fy = m ? 0.78 : 0.55, fr = m ? W * 0.42 : Math.min(W * 0.27, H * 0.4);
@@ -417,6 +457,9 @@ function start() {
       bhBlit.material.uniforms.uA.value = wBH * iBH;
     }
 
+    skyMat.uniforms.uTime.value = time; skyMat.uniforms.uTurn.value = S.y / Math.max(1, L.max) * 1.4;
+    skyMat.uniforms.uAlpha.value = (1 - wBH) * (1 - sstep(0.1, 0.75, arrive(contactSec)));
+    sky.visible = skyMat.uniforms.uAlpha.value > 0.002;
     // stars streak past on every trip; the particle film steps aside while we move
     warpMat.uniforms.uTime.value = time;
     warpMat.uniforms.uWarp.value = tw;
@@ -561,7 +604,31 @@ function start() {
     const flick = 1 + Math.sin(time * 40) * 0.06 + Math.sin(time * 23) * 0.05;
     flame.scale.set(1 + R.pow * 0.2, (0.15 + R.pow * 0.85) * flick * (1 + tw * 0.9), 1 + R.pow * 0.2);
     flameMat.uniforms.uTime.value = time; flameMat.uniforms.uPower.value = clamp(R.pow * 1.4);
+    coreMat.uniforms.uTime.value = time; coreMat.uniforms.uPower.value = clamp(R.pow * 1.6);
     flame.visible = flameGlow.visible = R.pow > 0.02;
+    sideFlames.forEach((m, i) => { m.visible = R.pow > 0.25; m.scale.y = 0.45 * (0.4 + R.pow * 0.6) * (1 + Math.sin(time * 37 + i) * 0.08) * (1 + tw * 0.6); });
+    glowRing.opacity = 0.35 + R.pow * 0.65;
+    // exhaust trail: sparks shed from the nozzle drift away behind the rocket
+    trailMat.uniforms.uDpr.value = renderer.getPixelRatio(); trailMat.uniforms.uScale.value = size / 110;
+    if (motion && !SHOT && R.pow > 0.3 && w4 < 0.5) {
+      const ang = -R.a * Math.PI / 180, ex = Math.sin(-ang), ey = Math.cos(ang);   // rocket's up vector on screen (y up)
+      const k = Math.round(2 + R.pow * 3);
+      for (let j = 0; j < k; j++) {
+        const i = tNext; tNext = (tNext + 1) % NT;
+        const back = size * (0.62 + Math.random() * 0.25);
+        tPos[i * 3] = rocket.position.x - ex * back + (Math.random() - 0.5) * size * 0.05; tPos[i * 3 + 1] = rocket.position.y - ey * back + (Math.random() - 0.5) * size * 0.05; tPos[i * 3 + 2] = 1400;
+        tVel[i * 2] = -ex * (80 + Math.random() * 120) + (Math.random() - 0.5) * 40; tVel[i * 2 + 1] = -ey * (80 + Math.random() * 120) + (Math.random() - 0.5) * 40;
+        tAge[i] = 0.001; tSize[i] = 2 + Math.random() * 3.5;
+      }
+    }
+    let anyT = false;
+    for (let i = 0; i < NT; i++) {
+      if (tAge[i] <= 0) continue;
+      tAge[i] += dt * 1.6; if (tAge[i] >= 1) { tAge[i] = 0; continue; }
+      anyT = true; tPos[i * 3] += tVel[i * 2] * dt; tPos[i * 3 + 1] += tVel[i * 2 + 1] * dt;
+    }
+    trail.visible = anyT;
+    if (anyT) { tGeo.attributes.position.needsUpdate = true; tGeo.attributes.aAge.needsUpdate = true; tGeo.attributes.aSize.needsUpdate = true; }
     flameGlow.scale.setScalar(0.9 + R.pow * 0.9); flameGlow.material.uniforms.uAlpha.value = R.pow * 0.9;
 
     // touchdown: the pad brightens, dust kicks up, the engine cuts
