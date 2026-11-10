@@ -31,3 +31,18 @@ html:not(.motion) .orbit-pin { position: relative; height: auto; overflow: visib
 html:not(.motion) .worlds { flex-wrap: wrap; justify-content: center; padding: 32px var(--m) 0; transform: none !important; gap: 24px 0; }
 html:not(.motion) .world { flex-basis: min(360px, 100%); }
 html:not(.motion) .orbit-rail { display: none; }
+
+/* Empty stretches of scroll where the stars streak past: the trip between scenes */
+.travel { height: var(--h, 120svh); position: relative; pointer-events: none; }
+html:not(.motion) .travel, .no-gl .travel { height: 0; }
+#bg { transition: none; }
+
+/* Landing: the whole name and copy on the left, the black hole on the right */
+@media (min-width: 900px) {
+  .hero-inner { max-width: min(62vw, 960px); }
+  .hero-title { font-size: clamp(4.5rem, min(11vw, 21svh), 14rem); }
+  .hero-title .line:last-child { text-align: left; margin-right: 0; }
+  .hero-row { grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+  .portrait { width: min(250px, 17vw, 30svh); }
+  .portrait figcaption { display: none; }
+}

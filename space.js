@@ -74,7 +74,7 @@ function start() {
   const bhMat = new THREE.ShaderMaterial({
     vertexShader: FULLSCREEN_VS, fragmentShader: BLACKHOLE_FS, depthTest: false, depthWrite: false,
     uniforms: { uRes: { value: new THREE.Vector2() }, uTime: { value: 0 }, uFade: { value: 1 }, uLook: { value: new THREE.Vector2() },
-      uSteps: { value: 200 }, uShift: { value: new THREE.Vector2() }, uZoom: { value: 2.1 } },
+      uSteps: { value: 200 }, uShift: { value: new THREE.Vector2() }, uZoom: { value: 2.1 }, uDist: { value: 28 } },
   });
   bhScene.add(flat(bhMat, 0));
   const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter });
@@ -86,12 +86,19 @@ function start() {
         vec3 c = textureLod(tMap, vUv, 0.).rgb;
         // cheap bloom from the mip chain: the disk glows into the dark around it
         vec3 g = textureLod(tMap, vUv, 3.).rgb * .35 + textureLod(tMap, vUv, 5.).rgb * .45 + textureLod(tMap, vUv, 6.5).rgb * .5;
-        c += g * vec3(1., .82, .62) * .55;
+        c += g * vec3(1., .82, .62) * .42;
         gl_FragColor = vec4(c * uA, 1.);
       }`,
     uniforms: { tMap: { value: rt.texture }, uA: { value: 1 } },
   }), 0);
   scene.add(bhBlit);
+
+  /* --- star warp for the trips between scenes */
+  const warpMat = new THREE.ShaderMaterial({
+    vertexShader: FULLSCREEN_VS, fragmentShader: WARP_FS, transparent: true, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uRes: { value: new THREE.Vector2() }, uTime: { value: 0 }, uWarp: { value: 0 }, uAlpha: { value: 0 }, uTint: { value: C('#9fd8ff') } },
+  });
+  const warp = flat(warpMat, 1); scene.add(warp);
 
   /* --- planets */
   const sphereHi = new THREE.SphereGeometry(1, 96, 64), sphereLo = new THREE.SphereGeometry(1, 48, 32);
@@ -215,7 +222,10 @@ function start() {
   const sec = (k) => $(`[data-space="${k}"]`);
   const heroSec = sec('bh'), sunSec = sec('sun'), workSec = sec('work'), expSec = sec('earth'), stackSec = sec('stack'), contactSec = sec('land');
   const stops = [sunSec, workSec, expSec, stackSec, contactSec];
-  const L = { bounds: [], max: 1, descentFrom: 0, workTop: 0, workH: 1, orbitTop: 0, travel: 1, slot: 300 };
+  const L = { travels: [], bounds: [], max: 1, descentFrom: 0, workTop: 0, workH: 1, orbitTop: 0, travel: 1, slot: 300 };
+  const travelEls = $$('[data-travel]'), film = $('#bg');
+  const TINT = { sun: '#a8d8ff', planets: '#c8b8ff', earth: '#8fd0ff', land: '#ffb27a' };
+  const STRENGTH = { sun: 1, planets: 0.7, earth: 0.75, land: 0.8 };
   const orbitEl = $('#orbit'), worldsEl = $('#worlds'), orbitRail = $('#orbitRail');
 
   function layout() {
@@ -225,8 +235,10 @@ function start() {
     cam.left = -S.W / 2; cam.right = S.W / 2; cam.top = S.H / 2; cam.bottom = -S.H / 2; cam.updateProjectionMatrix();
     rt.setSize(Math.max(2, Math.round(S.W * rtQ)), Math.max(2, Math.round(S.H * rtQ)));
     bhMat.uniforms.uRes.value.set(rt.width, rt.height);
-    bhMat.uniforms.uShift.value.set(S.mobile ? 0 : 0.1, S.mobile ? 0.2 : 0.1);
-    bhMat.uniforms.uZoom.value = S.W / S.H < 0.8 ? 1.15 : 1.85;
+    const asp = S.W / S.H;
+    bhMat.uniforms.uShift.value.set(S.mobile ? asp * 0.22 : asp * 0.25, S.mobile ? 0.24 : 0.03);
+    bhMat.uniforms.uZoom.value = asp < 0.8 ? 1.25 : 2.2;
+    warpMat.uniforms.uRes.value.set(S.W, S.H);
     landMat.uniforms.uRes.value.set(S.W, S.H);
     landMat.uniforms.uPadPos.value.set(S.mobile ? 0.86 : 0.86, S.mobile ? 0.27 : 0.32);
     smokeMat.uniforms.uDpr.value = dpr;
@@ -239,6 +251,7 @@ function start() {
     }
     const top = (el) => el.getBoundingClientRect().top + scrollY;
     if (orbitEl) L.orbitTop = top(orbitEl);
+    L.travels = travelEls.map((el) => ({ kind: el.dataset.travel, top: top(el), h: el.offsetHeight }));
     L.bounds = stops.map(top);
     L.workTop = top(workSec); L.workH = workSec.offsetHeight;
     L.max = document.documentElement.scrollHeight - S.H;
@@ -271,7 +284,7 @@ function start() {
   }
   function pose(k, time) {
     const W = S.W, H = S.H, m = S.mobile;
-    if (k === 0) return { x: m ? 0.82 : 0.56, y: (m ? 0.52 : 0.6) + Math.sin(time * 1.3) * 0.008, a: 32 + Math.sin(time * 0.9) * 3, sz: 1, pow: 0.55, z: 1500 };
+    if (k === 0) return { x: m ? 0.84 : 0.62, y: (m ? 0.44 : 0.74) + Math.sin(time * 1.3) * 0.008, a: 32 + Math.sin(time * 0.9) * 3, sz: 1, pow: 0.55, z: 1500 };
     if (k === 1) return { x: m ? 0.84 : 0.6, y: m ? 0.15 : 0.2, a: 72 + Math.sin(time) * 3, sz: 0.85, pow: 0.75, z: 1500 };
     if (k === 2) {
       const or = orbitEl && orbitEl.getBoundingClientRect();
@@ -316,6 +329,16 @@ function start() {
     L.bounds.forEach((b) => { s += sstep(b - S.H * 0.92, b - S.H * 0.12, S.y); });
     const seg = Math.min(4, Math.floor(s)), f = s - seg;
 
+    // trips: 0 as a travel stretch enters at the bottom, 1 once it has left at the top
+    const trip = {}; let tw = 0, tKind = 'sun';
+    L.travels.forEach((t) => {
+      const p = clamp((S.y - (t.top - S.H)) / (t.h + S.H));
+      const w = sstep(0.12, 0.42, p) * (1 - sstep(0.62, 0.92, p));
+      trip[t.kind] = p;
+      if (w > tw) { tw = w; tKind = t.kind; }
+    });
+    const tSun = trip.sun || 0;
+
     let iBH = 1, iRocket = 1;
     if (intro.on) {
       if (!intro.t0) intro.t0 = now;
@@ -326,7 +349,9 @@ function start() {
 
     // black hole behind the name
     lookX += (S.mx - lookX) * 0.04; lookY += (S.my - lookY) * 0.04;
-    const wBH = Math.pow(cover(heroSec), 1.3);
+    // the black hole stays put and falls away behind us as the trip starts
+    const wBH = tSun > 0 ? 1 - sstep(0.3, 0.55, tSun) : 1;
+    bhMat.uniforms.uDist.value = 28 + Math.pow(sstep(0.02, 0.5, tSun), 1.6) * 260;
     bhBlit.visible = wBH > 0.002;
     if (bhBlit.visible) {
       bhMat.uniforms.uTime.value = time; bhMat.uniforms.uLook.value.set(lookX, lookY);
@@ -334,25 +359,37 @@ function start() {
       bhBlit.material.uniforms.uA.value = wBH * iBH;
     }
 
+    // stars streak past on every trip; the particle film steps aside while we move
+    warpMat.uniforms.uTime.value = time;
+    warpMat.uniforms.uWarp.value = tw * (STRENGTH[tKind] || 1);
+    warpMat.uniforms.uAlpha.value = sstep(0, 0.25, tw);
+    warpMat.uniforms.uTint.value.set(TINT[tKind] || '#9fd8ff');
+    warp.visible = tw > 0.002;
+    if (film) film.style.opacity = (1 - tw * 0.92).toFixed(3);
+
     // the Sun behind "What I do"
-    const w1 = cover(sunSec);
+    const approach = sstep(0.5, 1, tSun);               // the Sun grows out of the dark at the end of the first trip
+    const w1 = Math.max(cover(sunSec), tSun > 0.5 && tSun < 1 ? sstep(0.5, 0.7, tSun) : 0);
     solar.visible = w1 > 0.002; sunGlow.visible = sunCorona.visible = solar.visible;
     if (solar.visible) {
-      const m = S.mobile, sr = m ? S.W * 0.13 : Math.min(S.W, S.H) * 0.09;
+      const m = S.mobile; let sr = m ? S.W * 0.13 : Math.min(S.W, S.H) * 0.09;
       const r = sunSec.getBoundingClientRect();
-      const sp = px(m ? S.W * 0.82 : S.W * 0.88, r.top + (m ? S.H * 0.14 : S.H * 0.2));
+      const fx = m ? S.W * 0.82 : S.W * 0.88, fy = r.top + (m ? S.H * 0.14 : S.H * 0.2);
+      const ap = r.top > 0 ? easeIO(approach) : 1;
+      const sp = px(mix(S.W * 0.5, fx, ap), r.top > 0 ? mix(S.H * 0.45, (m ? S.H * 0.14 : S.H * 0.2), ap) : fy);
+      const sr0 = sr; sr = sr0 * mix(0.06, 1, ap);
       solar.position.copy(sp); sun.scale.setScalar(sr);
       sun.rotation.y = time * 0.03;
       sunMat.uniforms.uTime.value = time; sunMat.uniforms.uOpacity.value = w1;
       sunGlow.position.copy(sp).setZ(-2000); sunGlow.scale.setScalar(sr * 9); sunGlow.material.uniforms.uAlpha.value = 0.5 * w1;
       sunCorona.position.copy(sp); sunCorona.scale.setScalar(sr * 3.1); sunCorona.material.uniforms.uAlpha.value = 0.45 * w1;
-      const span = m ? S.W * 1.3 : S.W * 0.9, first = sr * 1.9;
+      const span = (m ? S.W * 1.3 : S.W * 0.9) * mix(0.1, 1, ap), first = sr * 1.9;
       mini.forEach((o, i) => {
         const rr = first + (i / (ORDER.length - 1)) * (span - first);
         o.line.scale.setScalar(rr); o.line.material.opacity = 0.1 * w1;
         const a = o.phase + time * o.speed * 0.25 + S.y * 0.0009 * o.speed * 6;
         o.p.g.position.set(Math.cos(a) * rr, Math.sin(a) * rr, 0);
-        o.p.g.scale.setScalar((m ? 4 : 6) + o.p.d.size * (m ? 12 : 20));
+        o.p.g.scale.setScalar(((m ? 4 : 6) + o.p.d.size * (m ? 12 : 20)) * mix(0.15, 1, ap));
         o.p.g.quaternion.copy(orbitPlane.quaternion).invert();
         o.p.g.getWorldPosition(tmp);
         o.p.mat.uniforms.uSun.value.copy(sp).sub(tmp).normalize();
@@ -427,6 +464,12 @@ function start() {
     const k = s >= 5 ? 1 : easeIO(f);
     const T = s >= 5 ? pose(5, time) : { x: mix(A.x, B.x, k), y: mix(A.y, B.y, k), a: mixAngle(A.a, B.a, k), sz: mix(A.sz, B.sz, k), pow: mix(A.pow, B.pow, k), z: mix(A.z, B.z, clamp(k * 4)) };
     if (seg === 2 && f > 0) T.z = mix(A.z, B.z, clamp((k - 0.75) * 4));
+    if (tw > 0) {
+      // mid-trip: the rocket holds the centre with the engine wide open
+      const g = easeIO(tw), wob = Math.sin(time * 7) * 0.003;
+      T.x = mix(T.x, 0.5 + wob, g); T.y = mix(T.y, S.mobile ? 0.6 : 0.62, g); T.a = mixAngle(T.a, 0, g);
+      T.sz = mix(T.sz, 1.15, g); T.pow = mix(T.pow, 1, g); T.z = mix(T.z, 1500, clamp(g * 3));
+    }
     let tx = T.x * S.W, ty = T.y * S.H;
     if (iRocket < 1) { const e = easeOut(iRocket); tx = mix(S.W * 1.15, tx, e); ty = mix(S.H * 1.25, ty, e); }
     const kk = motion && !SHOT ? 1 - Math.exp(-dt * 5.5) : 1;
@@ -439,7 +482,7 @@ function start() {
     rocket.rotation.set(0, 0, -R.a * Math.PI / 180);
     bodyG.rotation.y = time * 0.5;
     const flick = 1 + Math.sin(time * 40) * 0.06 + Math.sin(time * 23) * 0.05;
-    flame.scale.set(1 + R.pow * 0.2, (0.15 + R.pow * 0.85) * flick, 1 + R.pow * 0.2);
+    flame.scale.set(1 + R.pow * 0.2, (0.15 + R.pow * 0.85) * flick * (1 + tw * 0.9), 1 + R.pow * 0.2);
     flameMat.uniforms.uTime.value = time; flameMat.uniforms.uPower.value = clamp(R.pow * 1.4);
     flame.visible = flameGlow.visible = R.pow > 0.02;
     flameGlow.scale.setScalar(0.9 + R.pow * 0.9); flameGlow.material.uniforms.uAlpha.value = R.pow * 0.9;

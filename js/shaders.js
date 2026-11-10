@@ -43,14 +43,14 @@ vec3 starsDir(vec3 d) {
 export const BLACKHOLE_FS = /* glsl */`
 precision highp float;
 varying vec2 vUv;
-uniform vec2 uRes; uniform float uTime; uniform float uFade; uniform vec2 uLook; uniform float uSteps; uniform vec2 uShift; uniform float uZoom;
+uniform vec2 uRes; uniform float uTime; uniform float uFade; uniform vec2 uLook; uniform float uSteps; uniform vec2 uShift; uniform float uZoom; uniform float uDist;
 ${NOISE}
 ${STARS}
 void main() {
   vec2 uv = (vUv - .5) * vec2(uRes.x / uRes.y, 1.);
   uv -= uShift;
   float tilt = .085 + uLook.y * .03;
-  vec3 ro = vec3(sin(uLook.x * .08) * 3., 28. * sin(tilt), -28. * cos(tilt));
+  vec3 ro = vec3(sin(uLook.x * .08) * 3., uDist * sin(tilt), -uDist * cos(tilt));
   vec3 fw = normalize(-ro), rt = normalize(cross(vec3(0, 1, 0), fw)), up = cross(fw, rt);
   vec3 rd = normalize(fw * uZoom + rt * uv.x + up * uv.y);
   rd = normalize(rd + up * -.02);
@@ -90,7 +90,7 @@ void main() {
       }
     }
     pos = npos;
-    if (r2 > 1500.) break;
+    if (r2 > uDist * uDist * 1.9) break;
   }
   // full bending near the hole, softened far out so distant stars stay points
   vec3 bg = starsDir(normalize(mix(rd, normalize(vel), mix(.3, 1., smoothstep(13., 4., minR)))));
@@ -132,6 +132,8 @@ void main() {
   vec2 g = vUv * uRes / 3.;
   float s = hash12(floor(g));
   col += vec3(step(.9965, s)) * (1. - uWarp) * (.4 + .6 * hash12(floor(g) + 1.)) * (.6 + .4 * sin(uTime * 2. + s * 50.));
+  col += uTint * exp(-r * 5.) * uWarp * uWarp * .35;
+  col *= 1. + uWarp * .6;
   gl_FragColor = vec4(col * uAlpha, 1.);
 }
 `;
