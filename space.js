@@ -356,6 +356,13 @@ function start() {
       const dest = pg.toEl.dataset.space || (pg.toEl.closest('[data-space]') || {}).dataset?.space || 'sun';
       tKind = dest; tw = Math.sin(Math.PI * pg.p) * (STRENGTH[dest] || 0.7);
     }
+    // the stars scatter and gather again into the next screen, like on first load
+    const F = window.DS && window.DS.film;
+    if (F && F.ok !== false) {
+      if (pg && pg.active && pg.big) { F.intro = 1 - Math.sin(Math.PI * pg.p) * 0.95; F._jump = true; }
+      else if (F._jump) { F.intro = 1; F._jump = false; }
+    }
+    tw *= 0.6;
     const heroGone = 1 - cover(heroSec);
 
     let iBH = 1, iRocket = 1;
@@ -450,7 +457,7 @@ function start() {
       workCorona.position.copy(wp).setZ(-1100); workCorona.scale.setScalar(wr * 2.8); workCorona.material.uniforms.uAlpha.value = 0.45 * orbitVis;
     }
     // the particle film steps back during jumps and around the planets
-    if (film) film.style.opacity = ((1 - tw * 0.9) * (1 - orbitVis * 0.85)).toFixed(3);
+    if (film) film.style.opacity = (1 - orbitVis * 0.7).toFixed(3);
 
     // a planet rises behind each domain
     backdrops.forEach(({ el, p }, i) => {
