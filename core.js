@@ -126,7 +126,7 @@ void main(){
     gl.enableVertexAttribArray(A.r); gl.vertexAttribPointer(A.r, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(A.from); gl.enableVertexAttribArray(A.to);
 
-    const KIND = { text: 0, terrain: 1, sphere: 2, lattice: 2, helix: 3, galaxy: 4 };
+    const KIND = { stars: 0, text: 0, terrain: 1, sphere: 2, lattice: 2, helix: 3, galaxy: 4 };
     const hex = (h) => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
     // two colours per scene and the axis the gradient runs along (x, y, z, scale per px)
     const PALETTE = {
@@ -136,6 +136,7 @@ void main(){
       helix:   ['#35d4ff', '#ff5fa8', [0, 1, 0], 1 / 900],
       lattice: ['#ffc24a', '#ff6a7d', [1, .4, 0], 1 / 700],
       galaxy:  ['#ffe28a', '#7d7dff', [1, 0, 0], 1 / 520],
+      stars:   ['#e8f0ff', '#b9c6ff', [1, 0, 0], 1 / 1400],
     };
     let stages = [];   // { el, shape, buf, kind, size, off }
 
@@ -236,7 +237,8 @@ void main(){
       }
       return { arr, size: 2.1 };
     }
-    const SHAPES = { terrain, sphere, helix, lattice, galaxy };
+    function stars() { const arr = new Float32Array(N * 3); dust(arr, 0); return { arr, size: 1.7 }; }  // plain drifting starfield
+    const SHAPES = { stars, terrain, sphere, helix, lattice, galaxy };
     const offsetFor = (shape) => {
       const wide = state.vw >= 900;
       if (!wide) return [0, shape === 'terrain' ? 0 : -state.vh * 0.05, 0];

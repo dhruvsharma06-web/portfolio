@@ -4,7 +4,7 @@
 import * as THREE from './vendor/three.module.min.js';
 import {
   FULLSCREEN_VS, BLACKHOLE_FS, WARP_FS, PLANET_VS, PLANET_FS, ATMO_FS, SUN_FS, LANDING_FS,
-  FLAME_VS, FLAME_FS, RING_VS, RING_FS, GLOW_VS, GLOW_FS, SMOKE_VS, SMOKE_FS,
+  FLAME_VS, FLAME_FS, RING_VS, RING_FS, GLOW_VS, GLOW_FS, SMOKE_VS, SMOKE_FS, RAYS_FS, SPARK_VS, SPARK_FS,
 } from './js/shaders.js';
 
 const root = document.documentElement;
@@ -46,6 +46,10 @@ worldBtns.forEach((b) => b.addEventListener('click', () => {
   $$('.glass', d).forEach((g) => g.classList.add('on', 'vis'));
 }));
 $$('dialog.sheet').forEach((d) => {
+  d.addEventListener('close', () => {
+    const c = $('.cursor'), dot = $('.cursor-dot');
+    c && c.classList.remove('big', 'card', 'label', 'text'); dot && dot.classList.remove('hide');
+  });
   $('[data-close]', d).addEventListener('click', () => closeSheet(d));
   d.addEventListener('click', (e) => { if (e.target === d) closeSheet(d); });
 });
@@ -158,6 +162,32 @@ function start() {
   const glowGeo = new THREE.PlaneGeometry(1, 1);
   const glowMat = (col, pow) => new THREE.ShaderMaterial({ vertexShader: GLOW_VS, fragmentShader: GLOW_FS, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending,
     uniforms: { uColor: { value: C(col) }, uAlpha: { value: 1 }, uPow: { value: pow } } });
+  // light and particles pouring off a Sun
+  function sunFX() {
+    const rays = new THREE.Mesh(glowGeo, new THREE.ShaderMaterial({ vertexShader: GLOW_VS, fragmentShader: RAYS_FS, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending,
+      uniforms: { uTime: { value: 0 }, uAlpha: { value: 1 } } }));
+    rays.renderOrder = 3; scene.add(rays);
+    const n = 420, pos = new Float32Array(n * 3), age = new Float32Array(n), size = new Float32Array(n), dir = new Float32Array(n * 2), spd = new Float32Array(n);
+    for (let i = 0; i < n; i++) { age[i] = Math.random(); const a = Math.random() * Math.PI * 2; dir[i * 2] = Math.cos(a); dir[i * 2 + 1] = Math.sin(a); spd[i] = 0.12 + Math.random() * 0.35; size[i] = 1.5 + Math.random() * 3; }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('aAge', new THREE.BufferAttribute(age, 1)); geo.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
+    const mat = new THREE.ShaderMaterial({ vertexShader: SPARK_VS, fragmentShader: SPARK_FS, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending,
+      uniforms: { uDpr: { value: 1 }, uAlpha: { value: 1 }, uScale: { value: 1 } } });
+    const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = 6; scene.add(pts);
+    return {
+      update(c, r, alpha, dt, time) {
+        const on = alpha > 0.002; rays.visible = pts.visible = on; if (!on) return;
+        rays.position.copy(c).setZ(-1900); rays.scale.setScalar(r * 7.5); rays.material.uniforms.uTime.value = time; rays.material.uniforms.uAlpha.value = alpha * 0.9;
+        mat.uniforms.uAlpha.value = alpha; mat.uniforms.uDpr.value = renderer.getPixelRatio(); mat.uniforms.uScale.value = clamp(r / 160, 0.6, 1.6);
+        for (let i = 0; i < n; i++) {
+          age[i] += dt * spd[i] * 0.6; if (age[i] >= 1) { age[i] = 0.0001; const a = Math.random() * Math.PI * 2; dir[i * 2] = Math.cos(a); dir[i * 2 + 1] = Math.sin(a); }
+          const d = r * (1.02 + age[i] * (1.6 + spd[i] * 4)), sw = Math.sin(age[i] * 6 + i) * 0.06;
+          pos[i * 3] = c.x + (dir[i * 2] - dir[i * 2 + 1] * sw) * d; pos[i * 3 + 1] = c.y + (dir[i * 2 + 1] + dir[i * 2] * sw) * d; pos[i * 3 + 2] = c.z + 10;
+        }
+        geo.attributes.position.needsUpdate = true; geo.attributes.aAge.needsUpdate = true;
+      },
+    };
+  }
   const sunGlow = new THREE.Mesh(glowGeo, glowMat('#ff9a3c', 2.2)); sunGlow.renderOrder = 4; scene.add(sunGlow);
   const sunCorona = new THREE.Mesh(glowGeo, glowMat('#fff1c8', 5)); sunCorona.renderOrder = 8; scene.add(sunCorona);
   // a second, bigger Sun that the planet track orbits out from
@@ -165,6 +195,7 @@ function start() {
   const workSun = new THREE.Mesh(sphereHi, wsMat); workSun.renderOrder = 4; scene.add(workSun);
   const workGlow = new THREE.Mesh(glowGeo, glowMat('#ff8a2c', 2.4)); workGlow.renderOrder = 3; scene.add(workGlow);
   const workCorona = new THREE.Mesh(glowGeo, glowMat('#ffe6b0', 4.5)); workCorona.renderOrder = 4; scene.add(workCorona);
+  const fxA = sunFX(), fxB = sunFX();
   const orbitPlane = new THREE.Group(); orbitPlane.rotation.x = 1.22; solar.add(orbitPlane);
   const mini = ORDER.map((n, i) => {
     const p = makePlanet(n, false); orbitPlane.add(p.g);
@@ -325,14 +356,15 @@ function start() {
       return { x: (e.x + Math.cos(ang) * rx) / W, y: (e.y + Math.sin(ang) * ry) / H, a: Math.atan2(dx, -dy) * 180 / Math.PI, sz: 0.6, pow: 0.6, z: Math.sin(ang) * e.r * 1.6 };
     }
     if (k === 4) return { x: m ? 0.86 : 0.88, y: m ? 0.12 : 0.2, a: 120 + Math.sin(time) * 4, sz: 0.75, pow: 0.7, z: 1500 };
-    // touchdown
-    const d = clamp((S.y - L.descentFrom) / Math.max(1, L.max - L.descentFrom));
+    // touchdown: once you arrive at the last screen the rocket comes down on its own
+    const d = landP;
     const pad = landMat.uniforms.uPadPos.value;
-    const ground = 1 - pad.y - rocketPx() * 0.62 / H;
+    const ground = 1 - pad.y - rocketPx() * 1.7 * 0.62 / H;
     const e = easeOut(d);
-    const pw = d < 0.8 ? 1 : d < 0.985 ? mix(1, 0.35, (d - 0.8) / 0.185) : 0;
-    return { x: pad.x + (1 - e) * 0.05, y: mix(0.05, ground, e), a: (1 - e) * -8, sz: 1, pow: pw, z: 1500, d };
+    const pw = d < 0.75 ? 1 : d < 0.97 ? mix(1, 0.3, (d - 0.75) / 0.22) : 0;
+    return { x: pad.x + (1 - e) * 0.05, y: mix(-0.1, ground, e), a: (1 - e) * -8, sz: 1.7, pow: pw, z: 1500, d };
   }
+  let landP = 0;
 
   /* ---------- Frame */
   let last = performance.now(), slowFrames = 0, frames = 0, lookX = 0, lookY = 0;
@@ -397,6 +429,7 @@ function start() {
     const approach = sstep(0.15, 1, arrive(sunSec));   // the Sun grows out of the dark as we arrive
     const w1 = cover(sunSec);
     solar.visible = w1 > 0.002; sunGlow.visible = sunCorona.visible = solar.visible;
+    if (!solar.visible) fxA.update(null, 0, 0, dt, time);
     if (solar.visible) {
       const m = S.mobile; let sr = m ? S.W * 0.13 : Math.min(S.W, S.H) * 0.09;
       const r = sunSec.getBoundingClientRect();
@@ -405,6 +438,7 @@ function start() {
       const sp = px(mix(S.W * 0.5, fx, ap), r.top > 0 ? mix(S.H * 0.45, (m ? S.H * 0.14 : S.H * 0.2), ap) : fy);
       const sr0 = sr; sr = sr0 * mix(0.06, 1, ap);
       solar.position.copy(sp); sun.scale.setScalar(sr);
+      fxA.update(sp, sr, w1, dt, time);
       sun.rotation.y = time * 0.03;
       sunMat.uniforms.uTime.value = time; sunMat.uniforms.uOpacity.value = w1;
       sunGlow.position.copy(sp).setZ(-2000); sunGlow.scale.setScalar(sr * 9); sunGlow.material.uniforms.uAlpha.value = 0.5 * w1;
@@ -448,10 +482,12 @@ function start() {
 
     // the Sun the nine planets circle, low on the left
     workSun.visible = workGlow.visible = workCorona.visible = orbitVis > 0.002;
+    if (!workSun.visible) fxB.update(null, 0, 0, dt, time);
     if (workSun.visible) {
       const m = S.mobile, wr = m ? S.W * 0.38 : S.H * 0.34;
       const wp = px(m ? -S.W * 0.2 : -S.W * 0.1, m ? S.H * 0.92 : S.H * 0.58).setZ(-1200);
       workSun.position.copy(wp); workSun.scale.setScalar(wr); workSun.rotation.y = time * 0.02;
+      fxB.update(wp, wr, orbitVis * 0.6, dt, time);
       wsMat.uniforms.uTime.value = time; wsMat.uniforms.uOpacity.value = orbitVis * 0.75;
       workGlow.position.copy(wp).setZ(-2000); workGlow.scale.setScalar(wr * 6); workGlow.material.uniforms.uAlpha.value = 0.4 * orbitVis;
       workCorona.position.copy(wp).setZ(-1100); workCorona.scale.setScalar(wr * 2.8); workCorona.material.uniforms.uAlpha.value = 0.45 * orbitVis;
@@ -495,6 +531,8 @@ function start() {
 
     // aurora landing site behind Contact and the footer
     const w4 = sstep(0.1, 0.75, arrive(contactSec));
+    const atEnd = arrive(contactSec) > 0.97;
+    landP = SHOT ? (atEnd ? 1 : 0) : clamp(landP + (atEnd ? dt / 3.2 : -dt / 1.2));
     landing.visible = w4 > 0.002;
     landMat.uniforms.uAlpha.value = w4; landMat.uniforms.uTime.value = time;
 

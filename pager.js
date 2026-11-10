@@ -107,6 +107,11 @@
         const q = Math.min(1, -r.top / H());
         el.style.transform = `translate3d(0,${(-r.top * 0.55).toFixed(1)}px,0) scale(${(1 - q * 0.08).toFixed(4)})`;
         el.style.opacity = (1 - q * 0.95).toFixed(3);
+      } else if (r.top > 0 && r.top < H()) {
+        // the screen coming in rises out of a slight zoom, like arriving from far away
+        const q = r.top / H();
+        el.style.transform = `scale(${(1 + q * 0.06).toFixed(4)})`;
+        el.style.opacity = (1 - q * 0.6).toFixed(3);
       } else if (el.style.transform) { el.style.transform = ''; el.style.opacity = ''; }
     });
   };

@@ -252,6 +252,22 @@ void main() {
     au += tint * curtain * rays * (.9 - fi * .22);
   }
   sky += au * 1.1;
+  // shooting stars: a few bright streaks crossing the upper sky
+  for (int i = 0; i < 3; i++) {
+    float fi = float(i);
+    float cyc = uTime * (.16 + fi * .03) + fi * .37;
+    float id = floor(cyc), t = fract(cyc);
+    vec2 st = vec2(hash12(vec2(id, fi)) * 1.2 - .1, .62 + hash12(vec2(fi, id)) * .33);
+    vec2 dir = normalize(vec2(1., -.38 - hash12(vec2(id * 1.7, fi)) * .3));
+    float life = smoothstep(0., .05, t) * smoothstep(.32, .2, t);
+    vec2 head = st + dir * t * .9;
+    vec2 q = vec2((uv.x - head.x) * asp, uv.y - head.y);
+    vec2 dd = vec2(dir.x * asp, dir.y); float dl = length(dd); dd /= dl;
+    float along = dot(q, dd), across = abs(q.x * dd.y - q.y * dd.x);
+    float tail = smoothstep(-.16, 0., along) * step(along, 0.) * smoothstep(.0028, 0., across);
+    float tip = exp(-dot(q, q) * 9000.);
+    sky += vec3(.85, .92, 1.) * (tail * (1. + along * 6.) + tip * 1.5) * life;
+  }
   // mountains (back to front)
   vec3 col = sky;
   float x = uv.x * asp;
@@ -327,8 +343,41 @@ varying float vAge;
 void main() {
   if (vAge <= 0. || vAge >= 1.) discard;
   float d = length(gl_PointCoord - .5) * 2.;
-  float a = smoothstep(1., .2, d) * (1. - vAge) * smoothstep(0., .08, vAge) * .55;
-  vec3 c = mix(vec3(1., .78, .5), vec3(.55, .6, .7), smoothstep(0., .35, vAge));
+  float a = smoothstep(1., .2, d) * (1. - vAge) * smoothstep(0., .08, vAge) * .28;
+  vec3 c = mix(vec3(1., .7, .42), vec3(.32, .36, .44), smoothstep(0., .3, vAge));
   gl_FragColor = vec4(c, a);
+}
+`;
+
+/* Sunlight: soft rays fanning out of the Sun, turning slowly */
+export const RAYS_FS = /* glsl */`
+precision highp float;
+varying vec2 vUv; uniform float uTime; uniform float uAlpha;
+${NOISE}
+void main() {
+  vec2 p = vUv - .5; float r = length(p) * 2.; float a = atan(p.y, p.x);
+  float rays = fbm(vec2(a * 3.2 + uTime * .03, uTime * .05)) * .7 + fbm(vec2(a * 9. - uTime * .05, 3.)) * .5;
+  rays = pow(rays, 2.2) * 2.4;
+  float fall = smoothstep(1., .18, r) * smoothstep(.1, .24, r);
+  vec3 c = mix(vec3(1., .55, .18), vec3(1., .9, .65), smoothstep(.6, .2, r));
+  float core = pow(clamp(1. - r, 0., 1.), 3.) * .6;
+  gl_FragColor = vec4(c * (rays * fall + core) * uAlpha, 1.);
+}
+`;
+
+/* Solar wind: sparks streaming off the Sun */
+export const SPARK_VS = /* glsl */`
+attribute float aAge; attribute float aSize; varying float vAge; uniform float uDpr; uniform float uScale;
+void main() { vAge = aAge; gl_PointSize = aSize * uDpr * (1. - aAge * .6) * uScale; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }
+`;
+export const SPARK_FS = /* glsl */`
+precision highp float;
+varying float vAge; uniform float uAlpha;
+void main() {
+  if (vAge <= 0. || vAge >= 1.) discard;
+  float d = length(gl_PointCoord - .5) * 2.;
+  float a = smoothstep(1., 0., d) * smoothstep(0., .1, vAge) * (1. - vAge);
+  vec3 c = mix(vec3(1., .95, .7), vec3(1., .42, .12), vAge);
+  gl_FragColor = vec4(c * a * uAlpha, 1.);
 }
 `;
