@@ -49,8 +49,9 @@ ${STARS}
 void main() {
   vec2 uv = (vUv - .5) * vec2(uRes.x / uRes.y, 1.);
   uv -= uShift;
-  float tilt = .085 + uLook.y * .03;
-  vec3 ro = vec3(sin(uLook.x * .08) * 3., uDist * sin(tilt), -uDist * cos(tilt));
+  float tilt = .13 + uLook.y * .03 + sin(uTime * .07) * .02;
+  float yaw = uLook.x * .08 + sin(uTime * .05) * .12;
+  vec3 ro = vec3(sin(yaw) * uDist, uDist * sin(tilt), -uDist * cos(tilt) * cos(yaw));
   vec3 fw = normalize(-ro), rt = normalize(cross(vec3(0, 1, 0), fw)), up = cross(fw, rt);
   vec3 rd = normalize(fw * uZoom + rt * uv.x + up * uv.y);
   rd = normalize(rd + up * -.02);
@@ -82,8 +83,10 @@ void main() {
         hot = mix(hot, vec3(1., .95, .84), pow(temp, 4.));
         vec3 vd = normalize(vec3(-hit.z, 0., hit.x));
         float dop = dot(vd, normalize(vel));
-        float beam = pow(1. + .6 * dop, 3.);
-        vec3 dc = hot * dens * (.75 + 2.4 * pow(temp, 3.)) * beam;
+        float beam = pow(1. + .62 * dop, 3.);
+        hot = mix(hot, vec3(.82, .9, 1.), clamp(dop, 0., 1.) * .35 * temp);   // approaching side runs blue-white
+        vec3 dc = hot * dens * (.75 + 2.8 * pow(temp, 3.)) * beam;
+        dc += vec3(1., .88, .7) * smoothstep(3.3, 2.7, rr) * .7 * beam;      // white-hot inner rim
         float a = clamp(dens * .85, 0., 1.);
         col += (1. - alpha) * dc * a; alpha += (1. - alpha) * a;
         if (alpha > .985) break;
@@ -96,8 +99,8 @@ void main() {
   vec3 bg = starsDir(normalize(mix(rd, normalize(vel), mix(.3, 1., smoothstep(13., 4., minR)))));
   col += (1. - alpha) * bg;
   // thin photon ring hugging the shadow
-  col += (1. - alpha) * vec3(1., .78, .52) * exp(-abs(minR - 1.52) * 40.) * .45;
-  col = 1. - exp(-col * 1.05);
+  col += (1. - alpha) * vec3(1., .78, .52) * exp(-abs(minR - 1.52) * 34.) * .8;
+  col = 1. - exp(-col * .85);
   col *= uFade;
   gl_FragColor = vec4(col, 1.);
 }

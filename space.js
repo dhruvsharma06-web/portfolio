@@ -34,6 +34,21 @@ const PLANETS = {
 };
 const ORDER = Object.keys(PLANETS);
 const worldBtns = $$('.world-btn');
+function closeSheet(d) {
+  if (!d.open) return;
+  if (!motion) { d.close(); return; }
+  d.classList.add('closing');
+  setTimeout(() => { d.classList.remove('closing'); d.close(); }, 250);
+}
+worldBtns.forEach((b) => b.addEventListener('click', () => {
+  const d = document.getElementById(b.dataset.sheet); if (!d) return;
+  d.showModal(); d.scrollTop = 0;
+  $$('.glass', d).forEach((g) => g.classList.add('on', 'vis'));
+}));
+$$('dialog.sheet').forEach((d) => {
+  $('[data-close]', d).addEventListener('click', () => closeSheet(d));
+  d.addEventListener('click', (e) => { if (e.target === d) closeSheet(d); });
+});
 let hoverWorld = -1;
 worldBtns.forEach((b, i) => {
   const d = PLANETS[b.dataset.planet]; if (d) b.style.setProperty('--sz', d.size);
@@ -145,6 +160,11 @@ function start() {
     uniforms: { uColor: { value: C(col) }, uAlpha: { value: 1 }, uPow: { value: pow } } });
   const sunGlow = new THREE.Mesh(glowGeo, glowMat('#ff9a3c', 2.2)); sunGlow.renderOrder = 4; scene.add(sunGlow);
   const sunCorona = new THREE.Mesh(glowGeo, glowMat('#fff1c8', 5)); sunCorona.renderOrder = 8; scene.add(sunCorona);
+  // a second, bigger Sun that the planet track orbits out from
+  const wsMat = new THREE.ShaderMaterial({ vertexShader: PLANET_VS, fragmentShader: SUN_FS, transparent: true, uniforms: { uTime: { value: 0 }, uOpacity: { value: 1 } } });
+  const workSun = new THREE.Mesh(sphereHi, wsMat); workSun.renderOrder = 4; scene.add(workSun);
+  const workGlow = new THREE.Mesh(glowGeo, glowMat('#ff8a2c', 2.4)); workGlow.renderOrder = 3; scene.add(workGlow);
+  const workCorona = new THREE.Mesh(glowGeo, glowMat('#ffe6b0', 4.5)); workCorona.renderOrder = 4; scene.add(workCorona);
   const orbitPlane = new THREE.Group(); orbitPlane.rotation.x = 1.22; solar.add(orbitPlane);
   const mini = ORDER.map((n, i) => {
     const p = makePlanet(n, false); orbitPlane.add(p.g);
@@ -222,10 +242,10 @@ function start() {
   const sec = (k) => $(`[data-space="${k}"]`);
   const heroSec = sec('bh'), sunSec = sec('sun'), workSec = sec('work'), expSec = sec('earth'), stackSec = sec('stack'), contactSec = sec('land');
   const stops = [sunSec, workSec, expSec, stackSec, contactSec];
-  const L = { travels: [], bounds: [], max: 1, descentFrom: 0, workTop: 0, workH: 1, orbitTop: 0, travel: 1, slot: 300 };
-  const travelEls = $$('[data-travel]'), film = $('#bg');
-  const TINT = { sun: '#a8d8ff', planets: '#c8b8ff', earth: '#8fd0ff', land: '#ffb27a' };
-  const STRENGTH = { sun: 1, planets: 0.7, earth: 0.75, land: 0.8 };
+  const L = { bounds: [], max: 1, descentFrom: 0, workTop: 0, workH: 1, orbitTop: 0, travel: 1, slot: 300 };
+  const film = $('#bg');
+  const TINT = { bh: '#c8b8ff', sun: '#a8d8ff', work: '#c8b8ff', earth: '#8fd0ff', stack: '#b8c8ff', land: '#ffb27a' };
+  const STRENGTH = { bh: 0.8, sun: 1, work: 0.8, earth: 0.85, stack: 0.55, land: 0.85 };
   const orbitEl = $('#orbit'), worldsEl = $('#worlds'), orbitRail = $('#orbitRail');
 
   function layout() {
@@ -247,11 +267,11 @@ function start() {
       worldsEl.style.setProperty('--track-pad', `${(S.W - L.slot) / 2}px`);
       $$('.world', worldsEl).forEach((w) => w.style.setProperty('--slot', `${L.slot}px`));
       L.travel = L.slot * (ORDER.length - 1);
-      orbitEl.style.setProperty('--orbit-h', `${S.H + L.travel + S.H * 0.25}px`);
+      orbitEl.style.setProperty('--orbit-h', `${S.H + L.travel}px`);
     }
     const top = (el) => el.getBoundingClientRect().top + scrollY;
     if (orbitEl) L.orbitTop = top(orbitEl);
-    L.travels = travelEls.map((el) => ({ kind: el.dataset.travel, top: top(el), h: el.offsetHeight }));
+    if (window.__pagerRebuild) window.__pagerRebuild();
     L.bounds = stops.map(top);
     L.workTop = top(workSec); L.workH = workSec.offsetHeight;
     L.max = document.documentElement.scrollHeight - S.H;
@@ -329,15 +349,14 @@ function start() {
     L.bounds.forEach((b) => { s += sstep(b - S.H * 0.92, b - S.H * 0.12, S.y); });
     const seg = Math.min(4, Math.floor(s)), f = s - seg;
 
-    // trips: 0 as a travel stretch enters at the bottom, 1 once it has left at the top
-    const trip = {}; let tw = 0, tKind = 'sun';
-    L.travels.forEach((t) => {
-      const p = clamp((S.y - (t.top - S.H)) / (t.h + S.H));
-      const w = sstep(0.12, 0.42, p) * (1 - sstep(0.62, 0.92, p));
-      trip[t.kind] = p;
-      if (w > tw) { tw = w; tKind = t.kind; }
-    });
-    const tSun = trip.sun || 0;
+    // every jump between screens is a short hyperspace hop
+    const pg = window.__pager;
+    let tw = 0, tKind = 'sun';
+    if (pg && pg.active && pg.big && pg.toEl) {
+      const dest = pg.toEl.dataset.space || (pg.toEl.closest('[data-space]') || {}).dataset?.space || 'sun';
+      tKind = dest; tw = Math.sin(Math.PI * pg.p) * (STRENGTH[dest] || 0.7);
+    }
+    const heroGone = 1 - cover(heroSec);
 
     let iBH = 1, iRocket = 1;
     if (intro.on) {
@@ -350,8 +369,8 @@ function start() {
     // black hole behind the name
     lookX += (S.mx - lookX) * 0.04; lookY += (S.my - lookY) * 0.04;
     // the black hole stays put and falls away behind us as the trip starts
-    const wBH = tSun > 0 ? 1 - sstep(0.3, 0.55, tSun) : 1;
-    bhMat.uniforms.uDist.value = 28 + Math.pow(sstep(0.02, 0.5, tSun), 1.6) * 260;
+    const wBH = 1 - sstep(0.55, 0.95, heroGone);
+    bhMat.uniforms.uDist.value = 28 + Math.pow(heroGone, 1.6) * 240;
     bhBlit.visible = wBH > 0.002;
     if (bhBlit.visible) {
       bhMat.uniforms.uTime.value = time; bhMat.uniforms.uLook.value.set(lookX, lookY);
@@ -361,15 +380,15 @@ function start() {
 
     // stars streak past on every trip; the particle film steps aside while we move
     warpMat.uniforms.uTime.value = time;
-    warpMat.uniforms.uWarp.value = tw * (STRENGTH[tKind] || 1);
-    warpMat.uniforms.uAlpha.value = sstep(0, 0.25, tw);
+    warpMat.uniforms.uWarp.value = tw;
+    warpMat.uniforms.uAlpha.value = sstep(0, 0.2, tw);
     warpMat.uniforms.uTint.value.set(TINT[tKind] || '#9fd8ff');
     warp.visible = tw > 0.002;
-    if (film) film.style.opacity = (1 - tw * 0.92).toFixed(3);
+    
 
     // the Sun behind "What I do"
-    const approach = sstep(0.5, 1, tSun);               // the Sun grows out of the dark at the end of the first trip
-    const w1 = Math.max(cover(sunSec), tSun > 0.5 && tSun < 1 ? sstep(0.5, 0.7, tSun) : 0);
+    const approach = sstep(0.15, 1, arrive(sunSec));   // the Sun grows out of the dark as we arrive
+    const w1 = cover(sunSec);
     solar.visible = w1 > 0.002; sunGlow.visible = sunCorona.visible = solar.visible;
     if (solar.visible) {
       const m = S.mobile; let sr = m ? S.W * 0.13 : Math.min(S.W, S.H) * 0.09;
@@ -416,9 +435,22 @@ function start() {
       pl.g.scale.setScalar((r.width / 2) * (1 + pl.hover * 0.06));
       pl.body.rotation.y = time * 0.12 + i;
       pl.mat.uniforms.uTime.value = time; pl.mat.uniforms.uHover.value = pl.hover;
-      pl.mat.uniforms.uSun.value.set(-0.75, 0.4, 0.55).normalize();
+      pl.mat.uniforms.uSun.value.set(-0.9, 0.1, 0.45).normalize();
       pl.set(orbitVis);
     });
+
+    // the Sun the nine planets circle, low on the left
+    workSun.visible = workGlow.visible = workCorona.visible = orbitVis > 0.002;
+    if (workSun.visible) {
+      const m = S.mobile, wr = m ? S.W * 0.38 : S.H * 0.34;
+      const wp = px(m ? -S.W * 0.2 : -S.W * 0.1, m ? S.H * 0.92 : S.H * 0.58).setZ(-1200);
+      workSun.position.copy(wp); workSun.scale.setScalar(wr); workSun.rotation.y = time * 0.02;
+      wsMat.uniforms.uTime.value = time; wsMat.uniforms.uOpacity.value = orbitVis * 0.75;
+      workGlow.position.copy(wp).setZ(-2000); workGlow.scale.setScalar(wr * 6); workGlow.material.uniforms.uAlpha.value = 0.4 * orbitVis;
+      workCorona.position.copy(wp).setZ(-1100); workCorona.scale.setScalar(wr * 2.8); workCorona.material.uniforms.uAlpha.value = 0.45 * orbitVis;
+    }
+    // the particle film steps back during jumps and around the planets
+    if (film) film.style.opacity = ((1 - tw * 0.9) * (1 - orbitVis * 0.85)).toFixed(3);
 
     // a planet rises behind each domain
     backdrops.forEach(({ el, p }, i) => {
